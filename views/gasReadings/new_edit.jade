@@ -1,0 +1,20 @@
+extends ../layout
+
+block content
+	h1= title
+
+	- var path = reading ? '/' + encodeURIComponent(reading._id) : '';
+
+	form(method='POST', action='/gasReadings' + path)
+		p
+			label(for='date') Date<br />
+			input#date(name='date' value=reading && reading.date)
+		p
+			label(for='state') State<br />
+			input#state(name='state' value=reading && reading.state)
+		p
+			input(type='submit', value='Save')
+
+		- if (reading) {
+			input(name='_method', type='hidden', value='PUT')
+		-	}
