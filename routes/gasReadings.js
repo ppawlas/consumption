@@ -39,9 +39,10 @@ module.exports = function(app) {
 
 				var lastPage = (page + 1) * maxGasReadingsPerPage >= count;
 
-				res.render('gasReadings/index', {
+				res.render('readings/index', {
 					title: 'Gas Consumption', 
-					gasReadings: gasReadings, 
+					controllerPath: '/gasReadings/',
+					readings: gasReadings,				
 					page: page,
 					lastPage: lastPage
 				});				
@@ -50,11 +51,18 @@ module.exports = function(app) {
 	});
 
 	app.get('/gasReadings/new', function(req, res, next) {
-		res.render('gasReadings/new_edit', {title: 'New reading'});
+		res.render('readings/new_edit', {
+			title: 'New reading',
+			controllerPath: '/gasReadings'
+		});
 	});
 
 	app.get('/gasReadings/:id', loadGasReading, function(req, res, next) {
-		res.render('gasReadings/new_edit', {title: 'Edit reading', reading: req.reading});
+		res.render('readings/new_edit', {
+			title: 'Edit reading',
+			controllerPath: '/gasReadings',
+			reading: req.reading
+		});
 	});	
 
 	app.put('/gasReadings/:id', function(req, res, next) {
@@ -70,17 +78,17 @@ module.exports = function(app) {
 		);
 	});
 
-	app.del('/gasReadings/:id', function(req, res, next) {
-		GasReading.deleteExtended(req.params.id, function(err) {
+	app.del('/gasReadings/:id', loadGasReading, function(req, res, next) {
+		GasReading.deleteExtended(req.reading, function(err) {
 			if(err) {
 				return next(err);
 			}
 			res.redirect('/gasReadings');
-		})
+		});
 	});	
 
 	app.post('/gasReadings', function(req, res, next) {
-		GasReading.createReading(req.body, function(err) {
+		GasReading.createExtended(req.body, function(err) {
 			if (err) {
 				return next(err);
 			}

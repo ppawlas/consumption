@@ -1,0 +1,41 @@
+extends ../layout
+
+block content
+	h1= title
+
+	p
+		a(href=controllerPath + 'new') Enter new reading
+
+	table
+			thead
+				tr
+					th Date
+					th State
+					th Usage
+					th Daily usage
+					th Monthly prediction
+			tbody
+			- readings.forEach(function(reading) {
+				tr
+					td= reading.date.toLocaleDateString()
+					td= reading.state
+					td= reading.usage
+					td= reading.daily
+					td= reading.prediction
+					td
+						form(action=controllerPath + encodeURIComponent(reading._id), method='GET')
+							input(type='submit', value='Edit')									
+					td
+						form(action=controllerPath + encodeURIComponent(reading._id), method='POST')
+							input(name='_method', type='hidden', value='DELETE')
+							input(type='submit', value='Delete')					
+			- });		
+
+	- if (page > 0) {
+		a(href='?page=' + (page - 1)) Previous
+		&nbsp;
+	-	}
+
+	- if (! lastPage) {
+		a(href='?page=' + (page + 1)) Next
+	-	}	
