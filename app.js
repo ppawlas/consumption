@@ -31,6 +31,7 @@ if ('development' == app.get('env')) {
 
 require('./routes/index')(app);
 require('./routes/gasReadings')(app);
+require('./routes/electricityReadings')(app);
 require('./routes/waterReadings')(app);
 
 http.createServer(app).listen(app.get('port'), function(){

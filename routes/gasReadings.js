@@ -25,6 +25,10 @@ module.exports = function(app) {
 						},
 						next
 					);
+				},
+
+				function(next) {
+					GasReading.getLabels(next);
 				}
 			],
 
@@ -36,12 +40,14 @@ module.exports = function(app) {
 
 				var count = results[0];
 				var gasReadings = results[1];
+				var labels = results[2];
 
 				var lastPage = (page + 1) * maxGasReadingsPerPage >= count;
 
 				res.render('readings/index', {
 					title: 'Gas Consumption', 
 					controllerPath: '/gasReadings/',
+					labels: labels,
 					readings: gasReadings,				
 					page: page,
 					lastPage: lastPage

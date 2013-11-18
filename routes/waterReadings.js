@@ -25,7 +25,11 @@ module.exports = function(app) {
 						},
 						next
 					);
-				}
+				},
+
+				function(next) {
+					WaterReading.getLabels(next);
+				}						
 			],
 
 			// final callback
@@ -36,12 +40,14 @@ module.exports = function(app) {
 
 				var count = results[0];
 				var waterReadings = results[1];
+				var labels = results[2];
 
 				var lastPage = (page + 1) * maxWaterReadingsPerPage >= count;
 
 				res.render('readings/index', {
 					title: 'Water Consumption', 
 					controllerPath: '/waterReadings/',
+					labels: labels,
 					readings: waterReadings, 
 					page: page,
 					lastPage: lastPage
