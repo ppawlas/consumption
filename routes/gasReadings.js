@@ -4,7 +4,7 @@
  */
 var async = require('async');
 var GasReading = require('../data/models/gasReading');
-var loadGasReading = require('../middleware/load_gas_reading');
+var middleware = require('../middleware/gas');
 
 var maxGasReadingsPerPage = 5;
 
@@ -56,17 +56,19 @@ module.exports = function(app) {
 		);
 	});
 
-	app.get('/gasReadings/new', function(req, res, next) {
+	app.get('/gasReadings/new', middleware.loadLabels, function(req, res, next) {
 		res.render('readings/new_edit', {
 			title: 'New reading',
-			controllerPath: '/gasReadings'
+			controllerPath: '/gasReadings',
+			labels: req.labels			
 		});
 	});
 
-	app.get('/gasReadings/:id', loadGasReading, function(req, res, next) {
+	app.get('/gasReadings/:id', middleware.loadLabels, middleware.loadReading, function(req, res, next) {
 		res.render('readings/new_edit', {
 			title: 'Edit reading',
 			controllerPath: '/gasReadings',
+			labels: req.labels,
 			reading: req.reading
 		});
 	});	
@@ -84,7 +86,7 @@ module.exports = function(app) {
 		);
 	});
 
-	app.del('/gasReadings/:id', loadGasReading, function(req, res, next) {
+	app.del('/gasReadings/:id', middleware.loadReading, function(req, res, next) {
 		GasReading.deleteExtended(req.reading, function(err) {
 			if(err) {
 				return next(err);

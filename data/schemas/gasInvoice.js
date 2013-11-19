@@ -1,27 +1,30 @@
 var Schema = require('mongoose').Schema;
 var ReadingSchema = require('./reading');
 var extend = require('mongoose-schema-extend');
-var datetime = require('../../helpers/datetime');
 var numeric = require('../../helpers/numeric');
 
-var GasReadingSchema = ReadingSchema.extend({
+var GasInvoiceSchema = ReadingSchema.extend({
 	previous: {
 		type: Schema.ObjectId,
-		ref: 'GasReading',
+		ref: 'GasInvoice',
 		default: null
 	},
+	charge: {
+		type: Number,
+		required: true
+	},	
 	next: {
 		type: Schema.ObjectId,
-		ref: 'GasReading',
+		ref: 'GasInvoice',
 		default: null
 	}
 });
 
-GasReadingSchema.statics.getLabels = function(callback) {
+GasInvoiceSchema.statics.getLabels = function(callback) {
 	callback(null, 
 		{
-			'actuals': ['Date', 'State'],
-			'virtuals': ['Usage', 'Daily', 'Monthly prediction']
+			'actuals': ['Date', 'State', 'Charge'],
+			'virtuals': ['Usage', 'Price']
 		}
 	);
 };
@@ -31,25 +34,25 @@ GasReadingSchema.statics.getLabels = function(callback) {
  * @param {object} reading Document with information about single reading.
  * @param {function} callback Callback function.
  */
-GasReadingSchema.statics.setVirtuals = function(reading, callback) {
+GasInvoiceSchema.statics.setVirtuals = function(reading, callback) {
 	// start with empty virtuals object
 	reading.virtuals = {};
 
 	// virtual attributes are based on the previous reading
 	if (reading.previous !== null) {
 		reading.virtuals.usage = reading.state - reading.previous.state;
-		reading.virtuals.daily = reading.virtuals.usage / datetime.daysDiff(reading.date, reading.previous.date);
-		reading.virtuals.prediction = reading.virtuals.daily * datetime.daysInMonth(reading.date); // monthly prediction
 	} else {
-		reading.virtuals.usage = reading.virtuals.daily = reading.virtuals.monthly = null;
+		reading.virtuals.usage = reading.state;
 	}
+
+	reading.virtuals.price = reading.charge / reading.virtuals.usage;
 
 	// round virtual attributes
 	for(var virtual in reading.virtuals) {
-		reading.virtuals[virtual] = reading.virtuals[virtual] && numeric.round(reading.virtuals[virtual], 2);
+		reading.virtuals[virtual] = numeric.round(reading.virtuals[virtual], 2);
 	}
 
 	callback(null, reading);
 };
 
-module.exports = GasReadingSchema;
+module.exports = GasInvoiceSchema;

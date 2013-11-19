@@ -9,14 +9,19 @@ block content
 	table
 			thead
 				tr
-					- labels.forEach(function(label) {
+					- labels.actuals.forEach(function(label) {
 						th= label
 					-	});
+					- labels.virtuals.forEach(function(label) {
+						th= label
+					-	});					
 			tbody
 			- readings.forEach(function(reading) {
 				tr
-					td= reading.date.toLocaleDateString()
-					td= reading.state
+					- labels.actuals.forEach(function(label) {
+						- var actual = reading[label.toLowerCase()];
+						td= typeof actual === "object" ? actual.toLocaleDateString() : actual
+					-	});						
 					- for(var virtual in reading.virtuals) {
 						td= reading.virtuals[virtual]
 					- }

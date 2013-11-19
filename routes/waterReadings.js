@@ -4,7 +4,7 @@
  */
 var async = require('async');
 var WaterReading = require('../data/models/waterReading');
-var loadWaterReading = require('../middleware/load_water_reading');
+var middleware = require('../middleware/water');
 
 var maxWaterReadingsPerPage = 5;
 
@@ -56,18 +56,20 @@ module.exports = function(app) {
 		);
 	});
 
-	app.get('/waterReadings/new', function(req, res, next) {
+	app.get('/waterReadings/new', middleware.loadLabels, function(req, res, next) {
 		res.render('readings/new_edit', {
 			title: 'New reading',
-			controllerPath: '/waterReadings'
+			controllerPath: '/waterReadings',
+			labels: req.labels			
 		});
 	});
 
-	app.get('/waterReadings/:id', loadWaterReading, function(req, res, next) {
+	app.get('/waterReadings/:id', middleware.loadLabels, middleware.loadReading, function(req, res, next) {
 		res.render('readings/new_edit', {
-			title: 'Edit reading', 
-			reading: req.reading,
-			controllerPath: '/waterReadings'
+			title: 'Edit reading',
+			controllerPath: '/waterReadings',			
+			labels: req.labels,			
+			reading: req.reading
 		});
 	});	
 
@@ -84,7 +86,7 @@ module.exports = function(app) {
 		);
 	});
 
-	app.del('/waterReadings/:id', loadWaterReading, function(req, res, next) {
+	app.del('/waterReadings/:id', middleware.loadReading, function(req, res, next) {
 		WaterReading.deleteExtended(req.reading, function(err) {
 			if(err) {
 				return next(err);

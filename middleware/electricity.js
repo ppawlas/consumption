@@ -13,4 +13,15 @@ function loadElectricityReading(req, res, next) {
 	});
 }
 
-module.exports = loadElectricityReading;
+function loadElectricityLabels(req, res, next) {
+	ElectricityReading.getLabels(function(err, labels) {
+		if (err) {
+			return next(err);
+		}
+		req.labels = labels;
+		next();
+	});
+}
+
+module.exports.loadReading = loadElectricityReading;
+module.exports.loadLabels = loadElectricityLabels;

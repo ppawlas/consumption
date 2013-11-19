@@ -13,4 +13,15 @@ function loadWaterReading(req, res, next) {
 	});
 }
 
-module.exports = loadWaterReading;
+function loadWaterLabels(req, res, next) {
+	WaterReading.getLabels(function(err, labels) {
+		if (err) {
+			return next(err);
+		}
+		req.labels = labels;
+		next();
+	});
+}
+
+module.exports.loadReading = loadWaterReading;
+module.exports.loadLabels = loadWaterLabels;

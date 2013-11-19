@@ -4,7 +4,7 @@
  */
 var async = require('async');
 var ElectricityReading = require('../data/models/electricityReading');
-var loadElectricityReading = require('../middleware/load_electricity_reading');
+var middleware = require('../middleware/electricity');
 
 var maxElectricityReadingsPerPage = 5;
 
@@ -56,18 +56,20 @@ module.exports = function(app) {
 		);
 	});
 
-	app.get('/electricityReadings/new', function(req, res, next) {
+	app.get('/electricityReadings/new', middleware.loadLabels, function(req, res, next) {
 		res.render('readings/new_edit', {
 			title: 'New reading',
-			controllerPath: '/electricityReadings'
+			controllerPath: '/electricityReadings',
+			labels: req.labels			
 		});
 	});
 
-	app.get('/electricityReadings/:id', loadElectricityReading, function(req, res, next) {
+	app.get('/electricityReadings/:id', middleware.loadLabels, middleware.loadReading, function(req, res, next) {
 		res.render('readings/new_edit', {
-			title: 'Edit reading', 
-			reading: req.reading,
-			controllerPath: '/electricityReadings'
+			title: 'Edit reading',
+			controllerPath: '/electricityReadings',			
+			labels: req.labels,			
+			reading: req.reading
 		});
 	});	
 
@@ -84,7 +86,7 @@ module.exports = function(app) {
 		);
 	});
 
-	app.del('/electricityReadings/:id', loadElectricityReading, function(req, res, next) {
+	app.del('/electricityReadings/:id', middleware.loadReading, function(req, res, next) {
 		ElectricityReading.deleteExtended(req.reading, function(err) {
 			if(err) {
 				return next(err);

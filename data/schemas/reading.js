@@ -26,7 +26,12 @@ var ReadingSchema = new Schema({
 });
 
 ReadingSchema.statics.getLabels = function(callback) {
-	callback(null, ['Date', 'State', 'Usage', 'Daily', 'Monthly prediction', 'Yearly prediction']);
+	callback(null, 
+		{
+			'actuals': ['Date', 'State'],
+			'virtuals': ['Usage', 'Daily', 'Monthly prediction', 'Yearly prediction']
+		}
+	);
 };
 
 /**

@@ -13,4 +13,15 @@ function loadGasReading(req, res, next) {
 	});
 }
 
-module.exports = loadGasReading;
+function loadGasLabels(req, res, next) {
+	GasReading.getLabels(function(err, labels) {
+		if (err) {
+			return next(err);
+		}
+		req.labels = labels;
+		next();
+	});
+}
+
+module.exports.loadReading = loadGasReading;
+module.exports.loadLabels = loadGasLabels;
