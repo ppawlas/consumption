@@ -3,6 +3,13 @@ extends ../layout
 block content
 	h1= title
 
+	- if (links) {
+	- links.forEach(function(link) {
+		p
+			a(href=link.href)= link.name
+	-	});
+	-	}
+
 	p
 		a(href=controllerPath + 'new') Enter new reading
 

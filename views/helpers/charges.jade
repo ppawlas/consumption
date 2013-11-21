@@ -1,0 +1,16 @@
+extends ../layout
+
+block content
+	h1= title
+
+	form(method='POST', action='electricityCharges/' + encodeURIComponent(electricityCharge._id))
+		- labels.forEach(function(label) {
+			p
+				label(for=label)= label 
+				<br />
+				input(id=label, name=label, value=electricityCharge[label])
+		-	});
+
+		p
+			input(type='submit', value='Save')
+			input(name='_method', type='hidden', value='PUT')

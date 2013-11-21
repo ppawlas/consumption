@@ -8,11 +8,10 @@ block content
 	form(method='POST', action=controllerPath + actionPath)
 		- labels.actuals.forEach(function(label) {
 			- var lower = label.toLowerCase();
-			- console.log(lower);
 			p
 				label(for=lower)= label 
 				<br />
-				input(id=lower)(name=lower value=reading && reading[lower])
+				input(id=lower, name=lower value=reading && reading[lower])
 		-	});
 
 		p

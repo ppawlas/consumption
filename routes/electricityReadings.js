@@ -2,11 +2,14 @@
 /*
  * Electricity Routes
  */
+var fs = require('fs'); 
+var path = require('path');
 var async = require('async');
 var ElectricityReading = require('../data/models/electricityReading');
+var ElectricityCharge = require('../data/models/electricityCharge');
 var middleware = require('../middleware/electricity');
 
-var maxElectricityReadingsPerPage = 5;
+var maxElectricityReadingsPerPage = 500;
 
 module.exports = function(app) {
 
@@ -16,7 +19,6 @@ module.exports = function(app) {
 				function(next) {
 					ElectricityReading.count(next);
 				},
-
 				function(next) {
 					ElectricityReading.findExtended(
 						{ 
@@ -26,7 +28,6 @@ module.exports = function(app) {
 						next
 					);
 				},
-
 				function(next) {
 					ElectricityReading.getLabels(next);
 				}				
@@ -50,7 +51,11 @@ module.exports = function(app) {
 					labels: labels,
 					readings: electricityReadings, 
 					page: page,
-					lastPage: lastPage
+					lastPage: lastPage,
+					links: [
+						{ href: '/electricityCharges', name: 'Electricity Charges' },
+						{ href: '/electricityReadings/import/load', name: 'Import Data' }
+					]
 				});				
 			}
 		);
@@ -88,7 +93,7 @@ module.exports = function(app) {
 
 	app.del('/electricityReadings/:id', middleware.loadReading, function(req, res, next) {
 		ElectricityReading.deleteExtended(req.reading, function(err) {
-			if(err) {
+			if (err) {
 				return next(err);
 			}
 			res.redirect('/electricityReadings');
@@ -103,6 +108,63 @@ module.exports = function(app) {
 
 			res.redirect('/electricityReadings');
 		});
+	});	
+
+	app.get('/electricityReadings/import/load', function(req, res, next) {
+		console.log(__dirname);
+		var file = path.normalize(__dirname  + '/../data/raw/electricity.json');
+		fs.readFile(file, 'utf8', function(err, data) {
+			if (err) {
+				return next(err);
+			}
+
+			ElectricityReading.importData(JSON.parse(data), function(err) {
+				if (err) {
+					return next(err);
+				}
+				res.redirect('/electricityReadings');				
+			});
+		})
+	});
+
+	/*
+	 * Electricity Charges routes
+	 */
+	app.get('/electricityCharges', function(req, res, next) {
+		async.parallel([
+				function(next) {
+					ElectricityCharge.findExtended(next);
+				},
+				function(next) {
+					ElectricityCharge.getLabels(next);
+				}				
+			], 
+			function(err, results) {
+				if (err) {
+					return next(err);
+				}
+				var electricityCharge = results[0];
+				var labels = results[1];	
+
+				res.render('helpers/charges', {
+					title: 'Electricity Charges',
+					electricityCharge: electricityCharge,					
+					labels: labels
+				});
+			});
+	});
+
+	app.put('/electricityCharges/:id', function(req, res, next) {
+		ElectricityCharge.update(
+			{ _id: req.params.id },
+			{ $set: req.body },
+			function(err) {
+				if (err) {
+					return next(err);
+				}
+				res.redirect('/electricityReadings');
+			}
+		);
 	});	
 
 };

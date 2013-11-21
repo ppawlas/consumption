@@ -171,5 +171,15 @@ ReadingSchema.statics.deleteExtended = function(current, callback) {
 	);	
 };
 
+ReadingSchema.statics.importData = function(data, callback) {
+	var model = this;
+	async.forEachSeries(data, model.createExtended.bind(model), function(err) {
+		if (err) {
+			return callback(err);
+		}
+		return callback(null);
+	});
+};
+
 
 module.exports = ReadingSchema;
