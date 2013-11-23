@@ -29,7 +29,7 @@ block content
 				tr
 					- labels.actuals.forEach(function(label) {
 						- var actual = reading[label.toLowerCase()];
-						td= typeof actual === "object" ? actual.toLocaleDateString() : actual
+						td= actual && typeof actual === "object" ? actual.toLocaleDateString() : actual
 					-	});						
 					- for(var virtual in reading.virtuals) {
 						td= reading.virtuals[virtual]

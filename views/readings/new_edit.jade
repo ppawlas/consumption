@@ -6,13 +6,7 @@ block content
 	- var actionPath = reading ? '/' + encodeURIComponent(reading._id) : '';
 
 	form(method='POST', action=controllerPath + actionPath)
-		- labels.actuals.forEach(function(label) {
-			- var lower = label.toLowerCase();
-			p
-				label(for=lower)= label 
-				<br />
-				input(id=lower, name=lower value=reading && reading[lower])
-		-	});
+		include inputs
 
 		p
 			input(type='submit', value='Save')

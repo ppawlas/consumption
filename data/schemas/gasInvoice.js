@@ -20,11 +20,13 @@ var GasInvoiceSchema = ReadingSchema.extend({
 	}
 });
 
+GasInvoiceSchema.statics.notNull = true;
+
 GasInvoiceSchema.statics.getLabels = function(callback) {
 	callback(null, 
 		{
-			'actuals': ['Date', 'State', 'Charge'],
-			'virtuals': ['Usage', 'Price']
+			'actuals': ['Date', 'State', 'Usage', 'Charge'],
+			'virtuals': ['Price']
 		}
 	);
 };
@@ -59,15 +61,7 @@ GasInvoiceSchema.statics.findCosts = function(callback) {
 GasInvoiceSchema.statics.setVirtuals = function(reading, callback) {
 	// start with empty virtuals object
 	reading.virtuals = {};
-
-	// virtual attributes are based on the previous reading
-	if (reading.previous !== null) {
-		reading.virtuals.usage = reading.state - reading.previous.state;
-	} else {
-		reading.virtuals.usage = reading.state;
-	}
-
-	reading.virtuals.price = reading.charge / reading.virtuals.usage;
+	reading.virtuals.price = reading.charge / reading.usage;
 
 	// round virtual attributes
 	for(var virtual in reading.virtuals) {

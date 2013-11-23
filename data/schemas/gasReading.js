@@ -20,8 +20,8 @@ var GasReadingSchema = ReadingSchema.extend({
 GasReadingSchema.statics.getLabels = function(callback) {
 	callback(null, 
 		{
-			'actuals': ['Date', 'State'],
-			'virtuals': ['Usage', 'Daily', 'Monthly prediction']
+			'actuals': ['Date', 'State', 'Usage'],
+			'virtuals': ['Daily', 'Monthly prediction']
 		}
 	);
 };
@@ -37,11 +37,10 @@ GasReadingSchema.statics.setVirtuals = function(reading, callback) {
 
 	// virtual attributes are based on the previous reading
 	if (reading.previous !== null) {
-		reading.virtuals.usage = reading.state - reading.previous.state;
-		reading.virtuals.daily = reading.virtuals.usage / datetime.daysDiff(reading.date, reading.previous.date);
+		reading.virtuals.daily = reading.usage / datetime.daysDiff(reading.date, reading.previous.date);
 		reading.virtuals.prediction = reading.virtuals.daily * datetime.daysInMonth(reading.date); // monthly prediction
 	} else {
-		reading.virtuals.usage = reading.virtuals.daily = reading.virtuals.monthly = null;
+		reading.virtuals.daily = reading.virtuals.monthly = null;
 	}
 
 	// round virtual attributes

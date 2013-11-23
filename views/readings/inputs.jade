@@ -1,0 +1,22 @@
+p
+	label(for='date') Date
+	<br />
+	input(id='date', name='date' value=reading && reading['date'])
+p
+	label(for='state') State
+	<br />
+	input(id='state', name='state' value=reading && reading['state'])
+p
+	label(for='fixed') Fixed
+	input(id='fixed', type='checkbox', name='fixed' checked=reading && reading['fixed'])
+p
+	label(for='usage') Usage
+	<br />
+	input(id='usage', name='usage' disabled=! reading || ! reading['fixed'] value=reading && reading['usage'])
+
+- if (controllerPath === '/gasInvoices') {
+	p
+		label(for='charge') Charge
+		<br />
+		input(id='charge', name='charge' value=reading && reading['charge'])
+-	}

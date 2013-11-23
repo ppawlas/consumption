@@ -17,6 +17,15 @@ var ReadingSchema = new Schema({
 		type: Number,
 		required: true
 	},
+	usage: {
+		type: Number,
+		default: null
+	},
+	fixed: {
+		type: Boolean,
+		required: true,
+		default: false
+	},
 	next: {
 		type: Schema.ObjectId,
 		ref: 'Reading',
@@ -28,8 +37,8 @@ var ReadingSchema = new Schema({
 ReadingSchema.statics.getLabels = function(callback) {
 	callback(null, 
 		{
-			'actuals': ['Date', 'State'],
-			'virtuals': ['Usage', 'Daily', 'Monthly prediction', 'Yearly prediction']
+			'actuals': ['Date', 'State', 'Usage'],
+			'virtuals': ['Daily', 'Monthly prediction', 'Yearly prediction']
 		}
 	);
 };
@@ -45,12 +54,11 @@ ReadingSchema.statics.setVirtuals = function(reading, callback) {
 
 	// virtual attributes are based on the previous reading
 	if (reading.previous !== null) {
-		reading.virtuals.usage = reading.state - reading.previous.state;
-		reading.virtuals.daily = reading.virtuals.usage / datetime.daysDiff(reading.date, reading.previous.date);
+		reading.virtuals.daily = reading.usage / datetime.daysDiff(reading.date, reading.previous.date);
 		reading.virtuals.prediction = reading.virtuals.daily * datetime.daysInMonth(reading.date); // monthly prediction
 		reading.virtuals.yearly = reading.virtuals.daily * datetime.daysInYear(reading.date); // yearly prediction
 	} else {
-		reading.virtuals.usage = reading.virtuals.daily = reading.virtuals.monthly = reading.virtuals.yearly = null;
+		reading.virtuals.daily = reading.virtuals.monthly = reading.virtuals.yearly = null;
 	}
 
 	// round virtual attributes
@@ -78,41 +86,58 @@ ReadingSchema.statics.findExtended = function(options, callback) {
 		});	
 };
 
-ReadingSchema.statics.createExtended = function(reading, callback) {
-	/**
-	 * Finds id of the last reading saved so far
-	 * or returns null if there are no readings yet.
-	 * @param {function} callback Callback function.
-	 */
-	function findPreviousId(callback) {
-		// callculate total amount of readings
-		model.count({ }, function(err, count) {
-			if (err) {
-				return callback(err);
-			}
-			if (count === 0) {
-				return callback(null, null); // no readings yet
-			} else {
-				// if there are some readings, find the last one
-				model.findOne( { next: null }, function(err, reading) {
-					if (err) {
-						return callback(err);
-					}
-					return callback(null, reading._id);
-				});
-			}
-		});		
+/**
+ * Finds the last reading saved so far
+ * or returns null if there are no readings yet.
+ * @param {function} callback Callback function.
+ */
+ReadingSchema.statics.findPreviousReading = function(callback) {
+	// store model reference for closure
+	var model = this;	
+	// callculate total amount of readings
+	model.count({ }, function(err, count) {
+		if (err) {
+			return callback(err);
+		}
+		if (count === 0) {
+			return callback(null, null); // no readings yet
+		} else {
+			// if there are some readings, find the last one
+			model.findOne( { next: null }, function(err, reading) {
+				if (err) {
+					return callback(err);
+				}
+				return callback(null, reading);
+			});
+		}
+	});		
+};
+
+ReadingSchema.statics.getUsage = function(previous, current) {
+	// notNull is set if the first record should have the usage value defined
+	var notNull = typeof this.notNull !== 'undefined' ? this.notNull : false;
+	
+	if (previous === null) {
+		return notNull ? current.state : null;
 	}
 
+	return current.fixedUsage ? current.usage : current.state - previous.state;
+};
+
+ReadingSchema.statics.createExtended = function(reading, callback) {
 	// store model reference for closure
 	var model = this;
 	// find the previous reading
-	findPreviousId(function(err, id) {
+	model.findPreviousReading(function(err, previousReading) {
 		if (err) {
 			return callback(err);
 		}
 		// add reference to the previous reading inside incoming data
-		reading.previous = id;
+		reading.previous = previousReading ? previousReading.id : null;
+		// if there was no usage set, calculate it and put inside incoming data
+		if (! reading.usage) {
+			reading.usage = model.getUsage(previousReading, reading);
+		}
 		// create new document from incoming data
 		model.create(reading, function(err, reading) {
 			if (err) {
@@ -120,7 +145,7 @@ ReadingSchema.statics.createExtended = function(reading, callback) {
 			}
 			// update previous reading (if exists) with reference to the current one
 			if (reading.previous !== null) {
-				model.update({ _id: id }, { $set: { next: reading._id }}, function(err) {
+				model.update({ _id: previousReading.id }, { $set: { next: reading._id }}, function(err) {
 					if (err) {
 						return callback(err);
 					}
@@ -135,40 +160,124 @@ ReadingSchema.statics.createExtended = function(reading, callback) {
 	});
 };
 
-ReadingSchema.statics.deleteExtended = function(current, callback) {
+ReadingSchema.statics.updateExtended = function(reading, id, callback) {
 	// store model reference for closure	
 	var model = this;
 
-	// connect previous with next
+	// find the previous and next reading
 	async.parallel([
-			function(next) { 
-				model.update( // update previous
-					{ _id: current.previous },
-					{ $set: { next: current.next }},
-					next
-				);
+			function(next) {
+				model.findOne( { next: id }, next);
 			},
-			function(next) { 
-				model.update( // update next
-					{ _id: current.next },
-					{ $set: { previous: current.previous }},
-					next
-				);					
+			function(next) {
+				model.findOne( { previous: id }, next);
 			}
 		],
-		// delete current reading
-		function(err) {
+		function(err, results) {
 			if (err) {
 				return callback(err);
 			}
-			model.remove({ _id: current._id }, function(err) {
-				if (err) {
-					return callback(err);
+			var previousReading = results[0];
+			var nextReading = results[1];
+			// if there was no usage set, calculate it and put inside incoming data
+			if (! reading.usage) {
+				reading.usage = model.getUsage(previousReading, reading);
+			}
+			// update current and next reading
+			async.parallel([
+					function(next) {
+						model.update(
+							{ _id: id },
+							{ $set: reading },
+							next
+						);
+					},
+					function(next) {
+						if (nextReading) {
+							// calculate new usage of the next reading with respect to the current's state
+							var nextUsage = model.getUsage(reading, nextReading);							
+							// and update reading
+							model.update(
+								{ _id: nextReading._id },
+								{ $set: { usage: nextUsage } },
+								next
+							);							
+						} else {
+							next();
+						}
+					}
+				],
+				function(err) {
+					if (err) {
+						return callback(err);
+					}
+					return(callback(null));					
 				}
-				return(callback(null));
-			});
+			);
 		}
-	);	
+	);
+};
+
+ReadingSchema.statics.deleteExtended = function(current, callback) {
+	// store model reference for closure	
+	var model = this;
+	// find the previous and next reading
+	async.parallel([
+			function(next) {
+				model.findOne( { _id: current.previous }, next);
+			},
+			function(next) {
+				model.findOne( { _id: current.next }, next);
+			}
+		],
+		function(err, results) {
+			if (err) {
+				return callback(err);
+			}
+			var previousReading = results[0];
+			var nextReading = results[1];
+			// connect previous with next and update next's usage
+			async.parallel([
+					function(next) { 
+						model.update( // update previous
+							{ _id: current.previous },
+							{ $set: { next: current.next }},
+							next
+						);
+					},
+					function(next) { 
+						if (nextReading) {
+							// calculate usage of the next reading with respect to the previous
+							var nextUsage = model.getUsage(previousReading, nextReading);		
+							// and update reading					
+							model.update(
+								{ _id: current.next },
+								{ $set: { 
+									previous: current.previous,
+									usage: nextUsage
+								}},
+								next
+							);							
+						} else {
+							next();
+						}					
+					}
+				],
+				// delete current reading
+				function(err) {
+					if (err) {
+						return callback(err);
+					}
+					model.remove({ _id: current._id }, function(err) {
+						if (err) {
+							return callback(err);
+						}
+						return(callback(null));
+					});
+				}
+			);				
+		}
+	);
 };
 
 ReadingSchema.statics.importData = function(data, callback) {

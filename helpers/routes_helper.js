@@ -1,6 +1,7 @@
 var fs = require('fs'); 
 var formidable = require('formidable');
 var async = require('async');
+var common = require('../middleware/common');
 
 module.exports.getFlashMessages = function(req) {
 	var types = ['info', 'error'];
@@ -122,11 +123,8 @@ module.exports.getReading = function(app, middleware, controllerPath, title) {
 
 module.exports.putReading = function(app, model, controllerPath, redirectPath) {
 	redirectPath = typeof redirectPath !== 'undefined' ? redirectPath : controllerPath;
-
-	app.put(controllerPath + '/:id', function(req, res, next) {
-		model.update(
-			{ _id: req.params.id },
-			{ $set: req.body },
+	app.put(controllerPath + '/:id', common.setUsage, function(req, res, next) {
+		model.updateExtended(req.body, req.params.id,
 			function(err) {
 				if (err) {
 					return next(err);
@@ -151,7 +149,7 @@ module.exports.delReading = function(app, model, middleware, controllerPath) {
 };
 
 module.exports.postReading = function(app, model, controllerPath) {
-	app.post(controllerPath, function(req, res, next) {
+	app.post(controllerPath, common.setUsage, function(req, res, next) {
 		model.createExtended(req.body, function(err) {
 			if (err) {
 				return next(err);
@@ -169,4 +167,5 @@ module.exports.setRoutes = function(app, model, middleware, controllerPath, titl
 	this.putReading(app, model, controllerPath);
 	this.delReading(app, model, middleware, controllerPath);
 	this.postReading(app, model, controllerPath);
+	this.importData(app, model, controllerPath);
 };

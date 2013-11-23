@@ -1,3 +1,12 @@
+module.exports.setUsage = function(req, res, next) {
+	if (typeof req.body.fixed === 'undefined') {
+		req.body.fixed = false;
+	} else {
+		req.body.fixed = true;
+	}
+	next();
+};
+
 module.exports.loadReading = function(model) {
 	return function(req, res, next) {
 		model.findOne({ _id: req.params.id }, function(err, gasInvoice) {

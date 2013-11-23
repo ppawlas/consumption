@@ -21,8 +21,8 @@ var ElectricityReadingSchema = ReadingSchema.extend({
 ElectricityReadingSchema.statics.getLabels = function(callback) {
 	callback(null, 
 		{
-			'actuals': ['Date', 'State'],
-			'virtuals': ['Usage', 'Daily', 'Monthly prediction', 'Yearly prediction', 'Yearly charge', '2 months charge']
+			'actuals': ['Date', 'State', 'Usage'],
+			'virtuals': ['Daily', 'Monthly prediction', 'Yearly prediction', 'Yearly charge', '2 months charge']
 		}
 	);
 };
@@ -51,8 +51,7 @@ ElectricityReadingSchema.statics.setVirtuals = function(reading, callback) {
 			if (err) {
 				return callback(err);
 			}
-			reading.virtuals.usage = reading.state - reading.previous.state;
-			reading.virtuals.daily = reading.virtuals.usage / datetime.daysDiff(reading.date, reading.previous.date);
+			reading.virtuals.daily = reading.usage / datetime.daysDiff(reading.date, reading.previous.date);
 			reading.virtuals.prediction = reading.virtuals.daily * datetime.daysInMonth(reading.date); // monthly prediction
 			reading.virtuals.yearly = reading.virtuals.daily * datetime.daysInYear(reading.date); // yearly prediction
 			reading.virtuals.charge = calculateCharge(reading.virtuals.yearly, electricityCharge);
@@ -68,7 +67,7 @@ ElectricityReadingSchema.statics.setVirtuals = function(reading, callback) {
 		});
 
 	} else {
-		reading.virtuals.usage = reading.virtuals.daily = reading.virtuals.monthly = reading.virtuals.yearly = reading.virtuals.charge = reading.virtuals.charge2months = null;
+		reading.virtuals.daily = reading.virtuals.monthly = reading.virtuals.yearly = reading.virtuals.charge = reading.virtuals.charge2months = null;
 		callback(null, reading);	
 	}
 };
