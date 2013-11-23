@@ -2,64 +2,18 @@
 /*
  * Electricity Routes
  */
-var fs = require('fs'); 
-var path = require('path');
 var async = require('async');
 var ElectricityReading = require('../data/models/electricityReading');
 var ElectricityCharge = require('../data/models/electricityCharge');
 var middleware = require('../middleware/electricity');
+var routesHelper = require('../helpers/routes_helper');
 
 var maxElectricityReadingsPerPage = 500;
 
 module.exports = function(app) {
 
-	app.get('/electricityReadings', function(req, res, next) {
-		var page = req.query.page && parseInt(req.query.page, 10) || 0;
-		async.parallel([
-				function(next) {
-					ElectricityReading.count(next);
-				},
-				function(next) {
-					ElectricityReading.findExtended(
-						{ 
-							page: page,
-							maxPerPage: maxElectricityReadingsPerPage
-						},
-						next
-					);
-				},
-				function(next) {
-					ElectricityReading.getLabels(next);
-				}				
-			],
-
-			// final callback
-			function(err, results) {
-				if (err) {
-					return next(err);
-				}
-
-				var count = results[0];
-				var electricityReadings = results[1];
-				var labels = results[2];
-
-				var lastPage = (page + 1) * maxElectricityReadingsPerPage >= count;
-
-				res.render('readings/index', {
-					title: 'Electricity Consumption', 
-					controllerPath: '/electricityReadings/',
-					labels: labels,
-					readings: electricityReadings, 
-					page: page,
-					lastPage: lastPage,
-					links: [
-						{ href: '/electricityCharges', name: 'Electricity Charges' },
-						{ href: '/electricityReadings/import/load', name: 'Import Data' }
-					]
-				});				
-			}
-		);
-	});
+	routesHelper.getData(app, ElectricityReading, '/electricityReadings', 'Electricity Consumption',
+		[{ href: '/electricityCharges', name: 'Electricity Charges' }]);
 
 	app.get('/electricityReadings/new', middleware.loadLabels, function(req, res, next) {
 		res.render('readings/new_edit', {
@@ -110,22 +64,7 @@ module.exports = function(app) {
 		});
 	});	
 
-	app.get('/electricityReadings/import/load', function(req, res, next) {
-		console.log(__dirname);
-		var file = path.normalize(__dirname  + '/../data/raw/electricity.json');
-		fs.readFile(file, 'utf8', function(err, data) {
-			if (err) {
-				return next(err);
-			}
-
-			ElectricityReading.importData(JSON.parse(data), function(err) {
-				if (err) {
-					return next(err);
-				}
-				res.redirect('/electricityReadings');				
-			});
-		})
-	});
+	routesHelper.importData(app, ElectricityReading, '/electricityReadings');
 
 	/*
 	 * Electricity Charges routes

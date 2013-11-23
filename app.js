@@ -6,6 +6,7 @@
 var express = require('express');
 var http = require('http');
 var path = require('path');
+var flash = require('connect-flash');
 
 var dbURL = 'mongodb://localhost/mydb';
 var db = require('mongoose').connect(dbURL);
@@ -21,6 +22,9 @@ app.use(express.logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded());
 app.use(express.methodOverride());
+app.use(express.cookieParser('lazy otter'));
+app.use(express.session({ maxAge: 60000 }));
+app.use(flash());
 app.use(app.router);
 app.use(express.static(path.join(__dirname, 'public')));
 

@@ -5,56 +5,13 @@
 var async = require('async');
 var GasInvoice = require('../data/models/gasInvoice');
 var middleware = require('../middleware/invoice');
+var routesHelper = require('../helpers/routes_helper');
 
-var maxGasInvoicesPerPage = 5;
+var maxGasInvoicesPerPage = 500;
 
 module.exports = function(app) {
 
-	app.get('/gasInvoices', function(req, res, next) {
-		var page = req.query.page && parseInt(req.query.page, 10) || 0;
-		async.parallel([
-				function(next) {
-					GasInvoice.count(next);
-				},
-
-				function(next) {
-					GasInvoice.findExtended(
-						{ 
-							page: page,
-							maxPerPage: maxGasInvoicesPerPage
-						},
-						next
-					);
-				},
-
-				function(next) {
-					GasInvoice.getLabels(next);
-				}						
-			],
-
-			// final callback
-			function(err, results) {
-				if (err) {
-					return next(err);
-				}
-
-				var count = results[0];
-				var gasInvoices = results[1];
-				var labels = results[2];
-
-				var lastPage = (page + 1) * maxGasInvoicesPerPage >= count;
-
-				res.render('readings/index', {
-					title: 'Gas Invoices', 
-					controllerPath: '/gasInvoices/',
-					labels: labels,
-					readings: gasInvoices, 
-					page: page,
-					lastPage: lastPage
-				});				
-			}
-		);
-	});
+	routesHelper.getData(app, GasInvoice, '/gasInvoices', 'Gas Invoices');
 
 	app.get('/gasInvoices/new', middleware.loadLabels, function(req, res, next) {
 		res.render('readings/new_edit', {
@@ -104,5 +61,7 @@ module.exports = function(app) {
 			res.redirect('/gasInvoices');
 		});
 	});	
+
+	routesHelper.importData(app, GasInvoice, '/gasInvoices');
 
 };

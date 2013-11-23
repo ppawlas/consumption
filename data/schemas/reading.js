@@ -120,17 +120,17 @@ ReadingSchema.statics.createExtended = function(reading, callback) {
 			}
 			// update previous reading (if exists) with reference to the current one
 			if (reading.previous !== null) {
-				model.update( 
-					{ _id: id },
-					{ $set: { next: reading._id }},
-					function(err) {
-						if (err) {
-							return callback(err);
-						}
+				model.update({ _id: id }, { $set: { next: reading._id }}, function(err) {
+					if (err) {
+						return callback(err);
 					}
-				);
+					// return afteru update
+					return callback(null, reading);
+				});
+			} else {
+				// return when there was no update
+				return callback(null, reading);
 			}
-			return callback(null, reading);
 		});
 	});
 };
@@ -173,11 +173,18 @@ ReadingSchema.statics.deleteExtended = function(current, callback) {
 
 ReadingSchema.statics.importData = function(data, callback) {
 	var model = this;
-	async.forEachSeries(data, model.createExtended.bind(model), function(err) {
+	// remove old data
+	model.remove({ }, function(err) {
 		if (err) {
-			return callback(err);
+			callback(err);
 		}
-		return callback(null);
+		// insert new data
+		async.forEachSeries(data, model.createExtended.bind(model), function(err) {
+			if (err) {
+				return callback(err);
+			}
+			return callback(null);
+		});
 	});
 };
 

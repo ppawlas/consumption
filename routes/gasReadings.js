@@ -5,56 +5,13 @@
 var async = require('async');
 var GasReading = require('../data/models/gasReading');
 var middleware = require('../middleware/gas');
+var routesHelper = require('../helpers/routes_helper');
 
-var maxGasReadingsPerPage = 5;
+var maxGasReadingsPerPage = 500;
 
 module.exports = function(app) {
 
-	app.get('/gasReadings', function(req, res, next) {
-		var page = req.query.page && parseInt(req.query.page, 10) || 0;
-		async.parallel([
-				function(next) {
-					GasReading.count(next);
-				},
-
-				function(next) {
-					GasReading.findExtended(
-						{ 
-							page: page,
-							maxPerPage: maxGasReadingsPerPage
-						},
-						next
-					);
-				},
-
-				function(next) {
-					GasReading.getLabels(next);
-				}
-			],
-
-			// final callback
-			function(err, results) {
-				if (err) {
-					return next(err);
-				}
-
-				var count = results[0];
-				var gasReadings = results[1];
-				var labels = results[2];
-
-				var lastPage = (page + 1) * maxGasReadingsPerPage >= count;
-
-				res.render('readings/index', {
-					title: 'Gas Consumption', 
-					controllerPath: '/gasReadings/',
-					labels: labels,
-					readings: gasReadings,				
-					page: page,
-					lastPage: lastPage
-				});				
-			}
-		);
-	});
+	routesHelper.getData(app, GasReading, '/gasReadings', 'Gas Consumption');
 
 	app.get('/gasReadings/new', middleware.loadLabels, function(req, res, next) {
 		res.render('readings/new_edit', {
@@ -104,5 +61,7 @@ module.exports = function(app) {
 			res.redirect('/gasReadings');
 		});
 	});	
+
+	routesHelper.importData(app, GasReading, '/gasReadings');	
 
 };
