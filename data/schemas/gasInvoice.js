@@ -29,6 +29,28 @@ GasInvoiceSchema.statics.getLabels = function(callback) {
 	);
 };
 
+GasInvoiceSchema.statics.getCostsLabels = function(callback) {
+	callback(null, ['Year', 'Cost', 'Usage', 'Ratio']);
+};
+
+GasInvoiceSchema.statics.findCosts = function(callback) {
+	var model = this;
+
+	model.aggregate({ 
+		$group : {
+			_id : { $year : '$date'},
+			cost : { $sum : '$charge'},
+			usage : { $sum : '$usage'}
+		}}
+	).exec(function(err, results) {
+		if (err) {
+			callback(err);
+		}
+		console.log(results);
+		callback(null, null);
+	});
+};
+
 /**
  * Sets virtual attributes to the given reading.
  * @param {object} reading Document with information about single reading.
