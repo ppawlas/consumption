@@ -8,62 +8,10 @@ var ElectricityCharge = require('../data/models/electricityCharge');
 var middleware = require('../middleware/electricity');
 var routesHelper = require('../helpers/routes_helper');
 
-var maxElectricityReadingsPerPage = 500;
-
 module.exports = function(app) {
 
-	routesHelper.getData(app, ElectricityReading, '/electricityReadings', 'Electricity Consumption',
+	routesHelper.setRoutes(app, ElectricityReading, middleware, '/electricityReadings', {'Electricity': 'Gas Consumption'},
 		[{ href: '/electricityCharges', name: 'Electricity Charges' }]);
-
-	app.get('/electricityReadings/new', middleware.loadLabels, function(req, res, next) {
-		res.render('readings/new_edit', {
-			title: 'New reading',
-			controllerPath: '/electricityReadings',
-			labels: req.labels			
-		});
-	});
-
-	app.get('/electricityReadings/:id', middleware.loadLabels, middleware.loadReading, function(req, res, next) {
-		res.render('readings/new_edit', {
-			title: 'Edit reading',
-			controllerPath: '/electricityReadings',			
-			labels: req.labels,			
-			reading: req.reading
-		});
-	});	
-
-	app.put('/electricityReadings/:id', function(req, res, next) {
-		ElectricityReading.update(
-			{ _id: req.params.id },
-			{ $set: req.body },
-			function(err) {
-				if (err) {
-					return next(err);
-				}
-				res.redirect('/electricityReadings');
-			}
-		);
-	});
-
-	app.del('/electricityReadings/:id', middleware.loadReading, function(req, res, next) {
-		ElectricityReading.deleteExtended(req.reading, function(err) {
-			if (err) {
-				return next(err);
-			}
-			res.redirect('/electricityReadings');
-		});
-	});	
-
-	app.post('/electricityReadings', function(req, res, next) {
-		ElectricityReading.createExtended(req.body, function(err) {
-			if (err) {
-				return next(err);
-			}
-
-			res.redirect('/electricityReadings');
-		});
-	});	
-
 	routesHelper.importData(app, ElectricityReading, '/electricityReadings');
 
 	/*
@@ -93,17 +41,6 @@ module.exports = function(app) {
 			});
 	});
 
-	app.put('/electricityCharges/:id', function(req, res, next) {
-		ElectricityCharge.update(
-			{ _id: req.params.id },
-			{ $set: req.body },
-			function(err) {
-				if (err) {
-					return next(err);
-				}
-				res.redirect('/electricityReadings');
-			}
-		);
-	});	
+	routesHelper.putReading(app, ElectricityCharge, '/electricityCharges', '/electricityReadings');
 
 };

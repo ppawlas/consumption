@@ -42,7 +42,7 @@ module.exports.importData = function(app, model, controllerPath) {
 	});	
 };
 
-module.exports.getData = function(app, model, controllerPath, title, links) {
+module.exports.getReadings = function(app, model, controllerPath, title, links) {
 	links = typeof links !== 'undefined' ? links : [];
 
 	var routesHelper = this;
@@ -93,4 +93,80 @@ module.exports.getData = function(app, model, controllerPath, title, links) {
 			}
 		);
 	});
+};
+
+module.exports.getNewReading = function(app, middleware, controllerPath, title) {
+	title = typeof title !== 'undefined' ? title : 'New reading';
+
+	app.get(controllerPath + '/new', middleware.loadLabels, function(req, res, next) {
+		res.render('readings/new_edit', {
+			title: title,
+			controllerPath: controllerPath,
+			labels: req.labels
+		});
+	});
+};
+
+module.exports.getReading = function(app, middleware, controllerPath, title) {
+	title = typeof title !== 'undefined' ? title : 'Edit reading';
+
+	app.get(controllerPath + '/:id', middleware.loadLabels, middleware.loadReading, function(req, res, next) {
+		res.render('readings/new_edit', {
+			title: title,
+			controllerPath: controllerPath,			
+			labels: req.labels,			
+			reading: req.reading
+		});
+	});	
+};
+
+module.exports.putReading = function(app, model, controllerPath, redirectPath) {
+	redirectPath = typeof redirectPath !== 'undefined' ? redirectPath : controllerPath;
+
+	app.put(controllerPath + '/:id', function(req, res, next) {
+		model.update(
+			{ _id: req.params.id },
+			{ $set: req.body },
+			function(err) {
+				if (err) {
+					return next(err);
+				}
+				req.flash('info', 'Data has updated successfully!');
+				res.redirect(redirectPath);
+			}
+		);
+	});
+};
+
+module.exports.delReading = function(app, model, middleware, controllerPath) {
+	app.del(controllerPath + '/:id', middleware.loadReading, function(req, res, next) {
+		model.deleteExtended(req.reading, function(err) {
+			if(err) {
+				return next(err);
+			}
+			req.flash('info', 'Data has deleted successfully!');
+			res.redirect(controllerPath);
+		});
+	});	
+};
+
+module.exports.postReading = function(app, model, controllerPath) {
+	app.post(controllerPath, function(req, res, next) {
+		model.createExtended(req.body, function(err) {
+			if (err) {
+				return next(err);
+			}
+			req.flash('info', 'Data has been created successfully!');
+			res.redirect(controllerPath);
+		});
+	});	
+};
+
+module.exports.setRoutes = function(app, model, middleware, controllerPath, titles, links) {
+	this.getReadings(app, model, controllerPath, titles.index, links);
+	this.getNewReading(app, middleware, controllerPath, titles.new);
+	this.getReading(app, middleware, controllerPath, titles.edit);
+	this.putReading(app, model, controllerPath);
+	this.delReading(app, model, middleware, controllerPath);
+	this.postReading(app, model, controllerPath);
 };
