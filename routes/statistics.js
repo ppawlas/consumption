@@ -34,7 +34,7 @@ module.exports = function(app) {
 		return { 'periods': periods, 'data': data };
 	}
 
-	app.get('/statistics', function(req, res, next) {
+	function getStatistics(callback) {
 		async.parallel([
 				function(next) {
 					GasReading.getStatistics(next);	
@@ -48,7 +48,7 @@ module.exports = function(app) {
 			],
 			function(err, results) {
 				if (err) {
-					return next(err);
+					return callback(err);
 				}
 				var gas = results[0];
 				var electricity = results[1];
@@ -56,13 +56,40 @@ module.exports = function(app) {
 
 				var merged = mergeStatistics(gas, electricity, water);
 
-				res.render('statistics/index', {
-					title: 'Statistics',
-					periods: merged.periods,
-					data: merged.data
-				});
+				callback(null, merged);
 			}
 		);
+	}
+
+	app.get('/statistics/json', function(req, res, next) {
+		getStatistics(function(err, merged) {
+			if (err) {
+				return next(err);
+			}
+			res.set('Access-Control-Allow-Origin', '*');
+			res.set('Access-Control-Allow-Headers', 'X-Requested-With');			
+			res.send(merged);
+		});
 	});
+
+	app.get('/statistics', function(req, res, next) {
+		getStatistics(function(err, merged) {
+			if (err) {
+				return next(err);
+			}
+			res.render('statistics/index', {
+				title: 'Statistics',
+				links: [{ href: '/statistics/charts', name: 'Charts' }],
+				periods: merged.periods,
+				data: merged.data
+			});
+		});
+	});
+
+	app.get('/statistics/charts', function(req, res, next) {
+			res.render('statistics/charts', {
+				title: 'Charts'
+			});
+	});	
 
 };

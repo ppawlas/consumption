@@ -1,6 +1,9 @@
 extends ../layout
 
 block content
+	script(src='/javascripts/jquery-2.0.3.min.js')	
+	script(src='/javascripts/helper.js')
+
 	h1= title
 
 	- var actionPath = reading ? '/' + encodeURIComponent(reading._id) : '';
