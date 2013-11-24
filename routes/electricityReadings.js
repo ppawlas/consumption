@@ -12,7 +12,6 @@ module.exports = function(app) {
 
 	routesHelper.setRoutes(app, ElectricityReading, middleware, '/electricityReadings', {'Electricity': 'Gas Consumption'},
 		[{ href: '/electricityCharges', name: 'Electricity Charges' }]);
-	routesHelper.importData(app, ElectricityReading, '/electricityReadings');
 
 	/*
 	 * Electricity Charges routes

@@ -26,6 +26,20 @@ var ReadingSchema = new Schema({
 		required: true,
 		default: false
 	},
+	virtuals: {
+		daily: {
+			type: Number,
+			default: null
+		},
+		monthPrediction: {
+			type: Number,
+			default: null			
+		},
+		yearPrediction: {
+			type: Number,
+			default: null			
+		}
+	},
 	next: {
 		type: Schema.ObjectId,
 		ref: 'Reading',
@@ -43,32 +57,6 @@ ReadingSchema.statics.getLabels = function(callback) {
 	);
 };
 
-/**
- * Sets virtual attributes to the given reading.
- * @param {object} reading Document with information about single reading.
- * @param {function} callback Callback function.
- */
-ReadingSchema.statics.setVirtuals = function(reading, callback) {
-	// start with empty virtuals object
-	reading.virtuals = {};
-
-	// virtual attributes are based on the previous reading
-	if (reading.previous !== null) {
-		reading.virtuals.daily = reading.usage / datetime.daysDiff(reading.date, reading.previous.date);
-		reading.virtuals.prediction = reading.virtuals.daily * datetime.daysInMonth(reading.date); // monthly prediction
-		reading.virtuals.yearly = reading.virtuals.daily * datetime.daysInYear(reading.date); // yearly prediction
-	} else {
-		reading.virtuals.daily = reading.virtuals.monthly = reading.virtuals.yearly = null;
-	}
-
-	// round virtual attributes
-	for(var virtual in reading.virtuals) {
-		reading.virtuals[virtual] = reading.virtuals[virtual] && numeric.round(reading.virtuals[virtual], 2);
-	}
-
-	callback(null, reading);
-};
-
 ReadingSchema.statics.findExtended = function(options, callback) {
 	// store model reference for closure
 	var model = this;
@@ -77,12 +65,8 @@ ReadingSchema.statics.findExtended = function(options, callback) {
 		.sort('date')
 		.skip(options.page * options.maxPerPage)
 		.limit(options.maxPerPage)
-		.populate('previous') // load information about the previous reading
 		.exec(function(err, result) {
-			// extend result with the virtual attributes
-			async.map(result, model.setVirtuals, function(err, readings) {
-				callback(err, readings);
-			});
+			callback(err, result);
 		});	
 };
 
@@ -116,12 +100,28 @@ ReadingSchema.statics.findPreviousReading = function(callback) {
 ReadingSchema.statics.getUsage = function(previous, current) {
 	// notNull is set if the first record should have the usage value defined
 	var notNull = typeof this.notNull !== 'undefined' ? this.notNull : false;
-	
+
 	if (previous === null) {
 		return notNull ? current.state : null;
 	}
 
 	return current.fixedUsage ? current.usage : current.state - previous.state;
+};
+
+ReadingSchema.statics.getVirtuals = function(previousReading, reading, usage, callback) {
+	usage = typeof usage !== 'undefined' ? usage : reading.usage ;
+
+	var virtuals = {};
+
+	if (previousReading !== null) {
+		virtuals.daily = usage / datetime.daysDiff(reading.date, previousReading.date);
+		virtuals.monthPrediction = virtuals.daily * datetime.daysInMonth(reading.date);
+		virtuals.yearPrediction = virtuals.daily * datetime.daysInYear(reading.date);
+	} else {
+		virtuals.daily = virtuals.monthPrediction = virtuals.yearPrediction = null;
+	}
+
+	callback(null, virtuals);
 };
 
 ReadingSchema.statics.createExtended = function(reading, callback) {
@@ -138,25 +138,33 @@ ReadingSchema.statics.createExtended = function(reading, callback) {
 		if (! reading.usage) {
 			reading.usage = model.getUsage(previousReading, reading);
 		}
-		// create new document from incoming data
-		model.create(reading, function(err, reading) {
+		// set virtuals and put them inside incoming data and proceed
+		model.getVirtuals(previousReading, reading, undefined, function(err, virtuals) {
 			if (err) {
 				return callback(err);
 			}
-			// update previous reading (if exists) with reference to the current one
-			if (reading.previous !== null) {
-				model.update({ _id: previousReading.id }, { $set: { next: reading._id }}, function(err) {
-					if (err) {
-						return callback(err);
-					}
-					// return afteru update
+			reading.virtuals = virtuals;
+
+			// create new document from incoming data
+			model.create(reading, function(err, reading) {
+				if (err) {
+					return callback(err);
+				}
+				// update previous reading (if exists) with reference to the current one
+				if (reading.previous !== null) {
+					model.update({ _id: previousReading.id }, { $set: { next: reading._id }}, function(err) {
+						if (err) {
+							return callback(err);
+						}
+						// return after update
+						return callback(null, reading);
+					});
+				} else {
+					// return when there was no update
 					return callback(null, reading);
-				});
-			} else {
-				// return when there was no update
-				return callback(null, reading);
-			}
-		});
+				}
+			});			
+		});		
 	});
 };
 
@@ -182,38 +190,51 @@ ReadingSchema.statics.updateExtended = function(reading, id, callback) {
 			// if there was no usage set, calculate it and put inside incoming data
 			if (! reading.usage) {
 				reading.usage = model.getUsage(previousReading, reading);
-			}
-			// update current and next reading
-			async.parallel([
-					function(next) {
-						model.update(
-							{ _id: id },
-							{ $set: reading },
-							next
-						);
-					},
-					function(next) {
-						if (nextReading) {
-							// calculate new usage of the next reading with respect to the current's state
-							var nextUsage = model.getUsage(reading, nextReading);							
-							// and update reading
-							model.update(
-								{ _id: nextReading._id },
-								{ $set: { usage: nextUsage } },
-								next
-							);							
-						} else {
-							next();
-						}
-					}
-				],
-				function(err) {
-					if (err) {
-						return callback(err);
-					}
-					return(callback(null));					
+			}		
+			model.getVirtuals(previousReading, reading, undefined, function(err, virtuals) {
+				if (err) {
+					return callback(err);
 				}
-			);
+				reading.virtuals = virtuals;
+				// update current and next reading
+				async.parallel([
+						function(next) {
+							model.update(
+								{ _id: id },
+								{ $set: reading },
+								next
+							);
+						},
+						function(next) {
+							if (nextReading) {
+								// calculate new usage of the next reading with respect to the current's state
+								var nextUsage = model.getUsage(reading, nextReading);
+								// calculate new virtuals of the next reading with respect to the current's state
+								model.getVirtuals(reading, nextReading, nextUsage, function(err, virtuals) {	
+									if (err) {
+										return callback(err);
+									}									
+									var nextVirtuals = virtuals;
+									// and update reading
+									model.update(
+										{ _id: nextReading._id },
+										{ $set: { usage: nextUsage, virtuals: nextVirtuals } },
+										next
+									);										
+								});																			
+							} else {
+								next();
+							}
+						}
+					],
+					function(err) {
+						if (err) {
+							return callback(err);
+						}
+						return(callback(null));					
+					}
+				);
+			});	
 		}
 	);
 };
@@ -248,16 +269,24 @@ ReadingSchema.statics.deleteExtended = function(current, callback) {
 					function(next) { 
 						if (nextReading) {
 							// calculate usage of the next reading with respect to the previous
-							var nextUsage = model.getUsage(previousReading, nextReading);		
-							// and update reading					
-							model.update(
-								{ _id: current.next },
-								{ $set: { 
-									previous: current.previous,
-									usage: nextUsage
-								}},
-								next
-							);							
+							var nextUsage = model.getUsage(previousReading, nextReading);
+							// calculate new virtuals of the next reading with respect to the current's state
+							model.getVirtuals(previousReading, nextReading, nextUsage, function(err, virtuals) {	
+								if (err) {
+									return callback(err);
+								}										
+								var nextVirtuals = virtuals;
+								// and update reading					
+								model.update(
+									{ _id: current.next },
+									{ $set: { 
+										previous: current.previous,
+										usage: nextUsage,
+										virtuals: nextVirtuals
+									}},
+									next
+								);									
+							});														
 						} else {
 							next();
 						}					

@@ -13,6 +13,12 @@ var GasInvoiceSchema = ReadingSchema.extend({
 		type: Number,
 		required: true
 	},	
+	virtuals: {
+		price: {
+			type: Number,
+			default: null
+		}
+	},	
 	next: {
 		type: Schema.ObjectId,
 		ref: 'GasInvoice',
@@ -29,6 +35,15 @@ GasInvoiceSchema.statics.getLabels = function(callback) {
 			'virtuals': ['Price']
 		}
 	);
+};
+
+GasInvoiceSchema.statics.getVirtuals = function(previousReading, reading, usage, callback) {
+	usage = typeof usage !== 'undefined' ? usage : reading.usage ;
+
+	var virtuals = {};
+	virtuals.price = reading.charge / usage;	
+
+	callback(null, virtuals);
 };
 
 GasInvoiceSchema.statics.getCostsLabels = function(callback) {
@@ -51,24 +66,6 @@ GasInvoiceSchema.statics.findCosts = function(callback) {
 		console.log(results);
 		callback(null, null);
 	});
-};
-
-/**
- * Sets virtual attributes to the given reading.
- * @param {object} reading Document with information about single reading.
- * @param {function} callback Callback function.
- */
-GasInvoiceSchema.statics.setVirtuals = function(reading, callback) {
-	// start with empty virtuals object
-	reading.virtuals = {};
-	reading.virtuals.price = reading.charge / reading.usage;
-
-	// round virtual attributes
-	for(var virtual in reading.virtuals) {
-		reading.virtuals[virtual] = numeric.round(reading.virtuals[virtual], 2);
-	}
-
-	callback(null, reading);
 };
 
 module.exports = GasInvoiceSchema;

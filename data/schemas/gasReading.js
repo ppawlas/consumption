@@ -10,6 +10,16 @@ var GasReadingSchema = ReadingSchema.extend({
 		ref: 'GasReading',
 		default: null
 	},
+	virtuals: {
+		daily: {
+			type: Number,
+			default: null
+		},
+		monthPrediction: {
+			type: Number,
+			default: null			
+		}
+	},	
 	next: {
 		type: Schema.ObjectId,
 		ref: 'GasReading',
@@ -26,29 +36,19 @@ GasReadingSchema.statics.getLabels = function(callback) {
 	);
 };
 
-/**
- * Sets virtual attributes to the given reading.
- * @param {object} reading Document with information about single reading.
- * @param {function} callback Callback function.
- */
-GasReadingSchema.statics.setVirtuals = function(reading, callback) {
-	// start with empty virtuals object
-	reading.virtuals = {};
+GasReadingSchema.statics.getVirtuals = function(previousReading, reading, usage, callback) {
+	usage = typeof usage !== 'undefined' ? usage : reading.usage ;
 
-	// virtual attributes are based on the previous reading
-	if (reading.previous !== null) {
-		reading.virtuals.daily = reading.usage / datetime.daysDiff(reading.date, reading.previous.date);
-		reading.virtuals.prediction = reading.virtuals.daily * datetime.daysInMonth(reading.date); // monthly prediction
+	var virtuals = {};
+
+	if (previousReading !== null) {
+		virtuals.daily = usage / datetime.daysDiff(reading.date, previousReading.date);
+		virtuals.monthPrediction = virtuals.daily * datetime.daysInMonth(reading.date);
 	} else {
-		reading.virtuals.daily = reading.virtuals.monthly = null;
+		virtuals.daily = virtuals.monthPrediction = null;
 	}
 
-	// round virtual attributes
-	for(var virtual in reading.virtuals) {
-		reading.virtuals[virtual] = reading.virtuals[virtual] && numeric.round(reading.virtuals[virtual], 2);
-	}
-
-	callback(null, reading);
+	callback(null, virtuals);
 };
 
 module.exports = GasReadingSchema;

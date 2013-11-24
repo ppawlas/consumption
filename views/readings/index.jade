@@ -29,10 +29,10 @@ block content
 				tr
 					- labels.actuals.forEach(function(label) {
 						- var actual = reading[label.toLowerCase()];
-						td= actual && typeof actual === "object" ? actual.toLocaleDateString() : actual
+						td= actual && typeof actual === "object" ? actual.toLocaleDateString() : parseFloat(Math.round(actual * 100) / 100).toFixed(2)
 					-	});						
-					- for(var virtual in reading.virtuals) {
-						td= reading.virtuals[virtual]
+					- for(var virtual in reading.virtuals.toObject()) {
+						td= parseFloat(Math.round(reading.virtuals[virtual] * 100) / 100).toFixed(2)
 					- }
 					td
 						form(action=controllerPath + encodeURIComponent(reading._id), method='GET')

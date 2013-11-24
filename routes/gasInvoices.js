@@ -14,7 +14,6 @@ module.exports = function(app) {
 	routesHelper.setRoutes(app, GasInvoice, middleware, '/gasInvoices',
 		{'index': 'Gas Invoices', 'new': 'New invoice', 'edit': 'Edit invoice'},
 		[{ href: '/heatingCosts', name: 'Heating Costs' }]);
-	routesHelper.importData(app, GasInvoice, '/gasInvoices');
 
 	/*
 	 * Heating Costs routes

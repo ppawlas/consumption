@@ -57,4 +57,18 @@ ElectricityChargeSchema.statics.findExtended = function(callback) {
 	});
 };
 
+ElectricityChargeSchema.statics.updateExtended = function(charges, id, callback) {
+	var model = this;
+	model.update(
+		{ _id: id },
+		{ $set: charges },
+		function(err) {
+			if (err) {
+				return callback(err);
+			}
+			return callback(null);
+		}
+	);
+};
+
 module.exports = ElectricityChargeSchema;

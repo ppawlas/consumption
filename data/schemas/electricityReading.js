@@ -11,6 +11,28 @@ var ElectricityReadingSchema = ReadingSchema.extend({
 		ref: 'ElectricityReading',
 		default: null
 	},
+	virtuals: {
+		daily: {
+			type: Number,
+			default: null
+		},
+		monthPrediction: {
+			type: Number,
+			default: null			
+		},
+		yearPrediction: {
+			type: Number,
+			default: null			
+		},
+		yearCharge: {
+			type: Number,
+			default: null
+		},
+		monthsCharge: {
+			type: Number,
+			default: null
+		}
+	},	
 	next: {
 		type: Schema.ObjectId,
 		ref: 'ElectricityReading',
@@ -27,12 +49,9 @@ ElectricityReadingSchema.statics.getLabels = function(callback) {
 	);
 };
 
-/**
- * Sets virtual attributes to the given reading.
- * @param {object} reading Document with information about single reading.
- * @param {function} callback Callback function.
- */
-ElectricityReadingSchema.statics.setVirtuals = function(reading, callback) {
+ElectricityReadingSchema.statics.getVirtuals = function(previousReading, reading, usage, callback) {
+	console.log('hello virtuals');
+	console.log(callback);
 	function calculateCharge(yearly, electricityCharge) {
 		var C = electricityCharge.C;
 		var SSvn = electricityCharge.SSvn;
@@ -42,33 +61,27 @@ ElectricityReadingSchema.statics.setVirtuals = function(reading, callback) {
 
 		return C * yearly + SSvn * 12 + SoSJ * yearly + SZVnk * yearly + Sop * 12;
 	}
-	// start with empty virtuals object
-	reading.virtuals = {};
 
-	// virtual attributes are based on the previous reading
-	if (reading.previous !== null) {
+	usage = typeof usage !== 'undefined' ? usage : reading.usage ;
+
+	var virtuals = {};
+
+	if (previousReading !== null) {
 		ElectricityCharge.findExtended(function(err, electricityCharge) {
 			if (err) {
 				return callback(err);
 			}
-			reading.virtuals.daily = reading.usage / datetime.daysDiff(reading.date, reading.previous.date);
-			reading.virtuals.prediction = reading.virtuals.daily * datetime.daysInMonth(reading.date); // monthly prediction
-			reading.virtuals.yearly = reading.virtuals.daily * datetime.daysInYear(reading.date); // yearly prediction
-			reading.virtuals.charge = calculateCharge(reading.virtuals.yearly, electricityCharge);
-			reading.virtuals.charge2months = reading.virtuals.charge / 6 + electricityCharge.Os;
+			virtuals.daily = usage / datetime.daysDiff(reading.date, previousReading.date);
+			virtuals.monthPrediction = virtuals.daily * datetime.daysInMonth(reading.date);
+			virtuals.yearPrediction = virtuals.daily * datetime.daysInYear(reading.date);			
+			virtuals.yearCharge = calculateCharge(virtuals.yearPrediction, electricityCharge);
+			virtuals.monthsCharge = virtuals.yearCharge / 6 + electricityCharge.Os;
 
-
-				// round virtual attributes
-				for(var virtual in reading.virtuals) {
-					reading.virtuals[virtual] = reading.virtuals[virtual] && numeric.round(reading.virtuals[virtual], 2);
-				}
-
-				callback(null, reading);			
+			return callback(err, virtuals);		
 		});
-
 	} else {
-		reading.virtuals.daily = reading.virtuals.monthly = reading.virtuals.yearly = reading.virtuals.charge = reading.virtuals.charge2months = null;
-		callback(null, reading);	
+		virtuals.daily = virtuals.monthPrediction = virtuals.yearPrediction = yearCharge = monthsCharge = null;
+		return callback(null, virtuals);
 	}
 };
 
