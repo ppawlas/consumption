@@ -10,7 +10,7 @@ var routesHelper = require('../helpers/routes_helper');
 
 module.exports = function(app) {
 
-	routesHelper.setRoutes(app, ElectricityReading, middleware, '/electricityReadings', {'Electricity': 'Gas Consumption'},
+	routesHelper.setRoutes(app, ElectricityReading, middleware, '/electricityReadings', {'index': 'Electricity Consumption'},
 		[{ href: '/electricityCharges', name: 'Electricity Charges' }]);
 
 	/*

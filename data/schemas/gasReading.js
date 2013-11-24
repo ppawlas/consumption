@@ -30,8 +30,15 @@ var GasReadingSchema = ReadingSchema.extend({
 GasReadingSchema.statics.getLabels = function(callback) {
 	callback(null, 
 		{
-			'actuals': ['Date', 'State', 'Usage'],
-			'virtuals': ['Daily', 'Monthly prediction']
+			'actuals': [
+				{'name': 'Date', 'key': 'date'}, 
+				{'name': 'State', 'key': 'state'},
+				{'name': 'Usage', 'key': 'usage'}
+			],
+			'virtuals': [
+				{'name': 'Daily', 'key': 'daily'},
+				{'name': 'Monthly prediction', 'key': 'monthPrediction'}
+			]			
 		}
 	);
 };

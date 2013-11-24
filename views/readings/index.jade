@@ -3,13 +3,7 @@ extends ../layout
 block content
 	h1= title
 
-	- if (links) {
-	- links.forEach(function(link) {
-		p
-			a(href=link.href)= link.name
-	-	});
-	-	}
-
+	include links
 	include import
 
 	p
@@ -18,22 +12,11 @@ block content
 	table
 			thead
 				tr
-					- labels.actuals.forEach(function(label) {
-						th= label
-					-	});
-					- labels.virtuals.forEach(function(label) {
-						th= label
-					-	});					
+					include thead
 			tbody
 			- readings.forEach(function(reading) {
 				tr
-					- labels.actuals.forEach(function(label) {
-						- var actual = reading[label.toLowerCase()];
-						td= actual && typeof actual === "object" ? actual.toLocaleDateString() : parseFloat(Math.round(actual * 100) / 100).toFixed(2)
-					-	});						
-					- for(var virtual in reading.virtuals.toObject()) {
-						td= parseFloat(Math.round(reading.virtuals[virtual] * 100) / 100).toFixed(2)
-					- }
+					include tbody
 					td
 						form(action=controllerPath + encodeURIComponent(reading._id), method='GET')
 							input(type='submit', value='Edit')									
@@ -43,11 +26,4 @@ block content
 							input(type='submit', value='Delete')					
 			- });		
 
-	- if (page > 0) {
-		a(href='?page=' + (page - 1)) Previous
-		&nbsp;
-	-	}
-
-	- if (! lastPage) {
-		a(href='?page=' + (page + 1)) Next
-	-	}	
+	include paging

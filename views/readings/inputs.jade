@@ -1,7 +1,7 @@
 p
 	label(for='date') Date
 	<br />
-	input(id='date', name='date' value=reading && reading['date'])
+	input(id='date', name='date' value=reading ? reading['date'] : today())
 p
 	label(for='state') State
 	<br />

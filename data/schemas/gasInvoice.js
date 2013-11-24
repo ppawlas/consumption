@@ -31,8 +31,15 @@ GasInvoiceSchema.statics.notNull = true;
 GasInvoiceSchema.statics.getLabels = function(callback) {
 	callback(null, 
 		{
-			'actuals': ['Date', 'State', 'Usage', 'Charge'],
-			'virtuals': ['Price']
+			'actuals': [
+				{'name': 'Date', 'key': 'date'}, 
+				{'name': 'State', 'key': 'state'},
+				{'name': 'Usage', 'key': 'usage'},
+				{'name': 'Charge', 'key': 'charge'}				
+			],
+			'virtuals': [
+				{'name': 'Price', 'key': 'price'}
+			]			
 		}
 	);
 };
@@ -46,10 +53,6 @@ GasInvoiceSchema.statics.getVirtuals = function(previousReading, reading, usage,
 	callback(null, virtuals);
 };
 
-GasInvoiceSchema.statics.getCostsLabels = function(callback) {
-	callback(null, ['Year', 'Cost', 'Usage', 'Ratio']);
-};
-
 GasInvoiceSchema.statics.findCosts = function(callback) {
 	var model = this;
 
@@ -58,13 +61,15 @@ GasInvoiceSchema.statics.findCosts = function(callback) {
 			_id : { $year : '$date'},
 			cost : { $sum : '$charge'},
 			usage : { $sum : '$usage'}
+		}},
+		{$sort : { 
+			_id : 1
 		}}
 	).exec(function(err, results) {
 		if (err) {
 			callback(err);
 		}
-		console.log(results);
-		callback(null, null);
+		callback(null, results);
 	});
 };
 

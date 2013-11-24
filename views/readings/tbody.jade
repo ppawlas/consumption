@@ -1,0 +1,9 @@
+- labels.actuals.forEach(function(label) {
+	- var actual = reading[label.key];
+	- actual = actual ? typeof actual === 'object' ? actual.toLocaleDateString() : round(actual) : null;
+	td= actual
+-	});						
+- labels.virtuals.forEach(function(label) {
+	- var virtual = reading.virtuals[label.key];
+	td= round(virtual)
+- });

@@ -1,0 +1,20 @@
+extends ../layout
+
+block content
+	h1= title
+
+	table
+			thead
+				tr
+					th Period
+					th Gas / Day
+					th Electricity / Day
+					th Water / Week
+			tbody
+			- periods.forEach(function(period) {
+				tr
+					td= period
+					td= round(data[period].gas)
+					td= round(data[period].electricity)
+					td= round(data[period].water)
+			- });

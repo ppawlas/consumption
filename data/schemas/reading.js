@@ -51,8 +51,16 @@ var ReadingSchema = new Schema({
 ReadingSchema.statics.getLabels = function(callback) {
 	callback(null, 
 		{
-			'actuals': ['Date', 'State', 'Usage'],
-			'virtuals': ['Daily', 'Monthly prediction', 'Yearly prediction']
+			'actuals': [
+				{'name': 'Date', 'key': 'date'}, 
+				{'name': 'State', 'key': 'state'},
+				{'name': 'Usage', 'key': 'usage'}
+			],
+			'virtuals': [
+				{'name': 'Daily', 'key': 'daily'},
+				{'name': 'Monthly prediction', 'key': 'monthPrediction'},
+				{'name': 'Yearly prediction', 'key': 'yearPrediction'}
+			]
 		}
 	);
 };
@@ -323,6 +331,28 @@ ReadingSchema.statics.importData = function(data, callback) {
 			}
 			return callback(null);
 		});
+	});
+};
+
+ReadingSchema.statics.getStatistics = function(callback) {
+	var model = this;
+
+	model.aggregate({ 
+		$group : {
+			_id : { 
+				year : { $year : '$date' },
+				month : { $month : '$date' }
+			},
+			average : { $avg : '$virtuals.daily'},
+		}},
+		{$sort : { 
+			_id : 1
+		}}
+	).exec(function(err, results) {
+		if (err) {
+			callback(err);
+		}
+		callback(null, results);
 	});
 };
 

@@ -96,10 +96,10 @@ module.exports.getReadings = function(app, model, controllerPath, title, links) 
 	});
 };
 
-module.exports.getNewReading = function(app, middleware, controllerPath, title) {
+module.exports.getNewReading = function(app, controllerPath, title) {
 	title = typeof title !== 'undefined' ? title : 'New reading';
 
-	app.get(controllerPath + '/new', middleware.loadLabels, function(req, res, next) {
+	app.get(controllerPath + '/new', function(req, res, next) {
 		res.render('readings/new_edit', {
 			title: title,
 			controllerPath: controllerPath,
@@ -111,11 +111,10 @@ module.exports.getNewReading = function(app, middleware, controllerPath, title) 
 module.exports.getReading = function(app, middleware, controllerPath, title) {
 	title = typeof title !== 'undefined' ? title : 'Edit reading';
 
-	app.get(controllerPath + '/:id', middleware.loadLabels, middleware.loadReading, function(req, res, next) {
+	app.get(controllerPath + '/:id', middleware.loadReading, function(req, res, next) {
 		res.render('readings/new_edit', {
 			title: title,
-			controllerPath: controllerPath,			
-			labels: req.labels,			
+			controllerPath: controllerPath,
 			reading: req.reading
 		});
 	});	
@@ -162,7 +161,7 @@ module.exports.postReading = function(app, model, controllerPath) {
 
 module.exports.setRoutes = function(app, model, middleware, controllerPath, titles, links) {
 	this.getReadings(app, model, controllerPath, titles.index, links);
-	this.getNewReading(app, middleware, controllerPath, titles.new);
+	this.getNewReading(app, controllerPath, titles.new);
 	this.getReading(app, middleware, controllerPath, titles.edit);
 	this.putReading(app, model, controllerPath);
 	this.delReading(app, model, middleware, controllerPath);

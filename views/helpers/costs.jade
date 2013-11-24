@@ -2,3 +2,19 @@ extends ../layout
 
 block content
 	h1= title
+
+	table
+			thead
+				tr
+					th Year
+					th Cost
+					th Usage
+					th Ratio
+			tbody
+			- heatingCosts.forEach(function(heatingCost) {
+				tr
+					td= heatingCost._id
+					td= round(heatingCost.cost)
+					td= round(heatingCost.usage)
+					td= round(heatingCost.cost / heatingCost.usage)
+			- });

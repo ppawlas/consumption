@@ -33,11 +33,15 @@ if ('development' == app.get('env')) {
   app.use(express.errorHandler());
 }
 
+require('./helpers/datetime').locals(app);
+require('./helpers/numeric').locals(app);
+
 require('./routes/index')(app);
 require('./routes/gasReadings')(app);
 require('./routes/gasInvoices')(app);
 require('./routes/electricityReadings')(app);
 require('./routes/waterReadings')(app);
+require('./routes/statistics')(app);
 
 http.createServer(app).listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));

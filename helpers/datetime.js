@@ -30,3 +30,18 @@ module.exports.daysInYear = function(date) {
 
 	return module.exports.isLeapYear(date) ? 366 : 365;
 };
+
+module.exports.greaterThan = function(first, second) {
+	first = toDate(first);
+	second = toDate(second);
+
+	return first > second;
+};
+
+module.exports.locals = function(app) {
+	app.locals.today = function() {
+		var now = new Date();
+		var today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+		return today;		
+	}
+};

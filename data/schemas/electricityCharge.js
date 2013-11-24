@@ -1,3 +1,4 @@
+var async = require('async');
 var Schema = require('mongoose').Schema;
 
 var ElectricityChargeSchema = new Schema({
@@ -30,7 +31,11 @@ var ElectricityChargeSchema = new Schema({
 		type: Number,
 		required: true,
 		default: 23.79
-	}	
+	},
+	appliesFrom: {
+		type: Date,
+		default: null
+	}
 
 });
 
@@ -58,7 +63,18 @@ ElectricityChargeSchema.statics.findExtended = function(callback) {
 };
 
 ElectricityChargeSchema.statics.updateExtended = function(charges, id, callback) {
-	var model = this;
+	function updateReadings(err, docs) {
+		async.forEachSeries(docs, ElectricityReading.updateExtendedWrapper.bind(ElectricityReading), function(err) {
+			if (err) {
+				return callback(err);
+			}
+			return callback(null);
+		});				
+	}
+
+	var model = this;	
+	var ElectricityReading = require('../models/electricityReading');
+
 	model.update(
 		{ _id: id },
 		{ $set: charges },
@@ -66,7 +82,17 @@ ElectricityChargeSchema.statics.updateExtended = function(charges, id, callback)
 			if (err) {
 				return callback(err);
 			}
-			return callback(null);
+
+			model.findOne({ _id: id }, function(err, charges) {
+				if (err) {
+					return callback(err);
+				}
+				if (charges.appliesFrom) {
+					ElectricityReading.find({ date : { $gte: charges.appliesFrom }}, updateReadings);
+				} else {
+					ElectricityReading.find({ }, updateReadings);
+				}
+			});
 		}
 	);
 };

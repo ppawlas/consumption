@@ -43,15 +43,23 @@ var ElectricityReadingSchema = ReadingSchema.extend({
 ElectricityReadingSchema.statics.getLabels = function(callback) {
 	callback(null, 
 		{
-			'actuals': ['Date', 'State', 'Usage'],
-			'virtuals': ['Daily', 'Monthly prediction', 'Yearly prediction', 'Yearly charge', '2 months charge']
+			'actuals': [
+				{'name': 'Date', 'key': 'date'}, 
+				{'name': 'State', 'key': 'state'},
+				{'name': 'Usage', 'key': 'usage'}
+			],
+			'virtuals': [
+				{'name': 'Daily', 'key': 'daily'},
+				{'name': 'Monthly prediction', 'key': 'monthPrediction'},
+				{'name': 'Yearly prediction', 'key': 'yearPrediction'},
+				{'name': 'Yearly charge', 'key': 'yearCharge'},
+				{'name': '2 months charge', 'key': 'monthsCharge'}
+			]
 		}
 	);
 };
 
 ElectricityReadingSchema.statics.getVirtuals = function(previousReading, reading, usage, callback) {
-	console.log('hello virtuals');
-	console.log(callback);
 	function calculateCharge(yearly, electricityCharge) {
 		var C = electricityCharge.C;
 		var SSvn = electricityCharge.SSvn;
@@ -83,6 +91,18 @@ ElectricityReadingSchema.statics.getVirtuals = function(previousReading, reading
 		virtuals.daily = virtuals.monthPrediction = virtuals.yearPrediction = yearCharge = monthsCharge = null;
 		return callback(null, virtuals);
 	}
+};
+
+ElectricityReadingSchema.statics.updateExtendedWrapper = function(reading, callback) {
+	var model = this;
+	
+	var updatedReading = {};
+	updatedReading.date = reading.date;
+	updatedReading.state = reading.state;
+
+	model.updateExtended(updatedReading, reading._id, function(err) {
+		callback(err);
+	});
 };
 
 module.exports = ElectricityReadingSchema;

@@ -21,15 +21,3 @@ module.exports.loadReading = function(model) {
 		});
 	};
 };
-
-module.exports.loadLabels = function(model) {
-	return function(req, res, next) {	
-		model.getLabels(function(err, labels) {
-			if (err) {
-				return next(err);
-			}
-			req.labels = labels;
-			next();
-		});
-	};
-};
