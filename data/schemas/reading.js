@@ -334,25 +334,25 @@ ReadingSchema.statics.importData = function(data, callback) {
 	});
 };
 
-ReadingSchema.statics.getStatistics = function(callback) {
+ReadingSchema.statics.getStatistics = function(limits, callback) {
+
 	var model = this;
 
-	model.aggregate({ 
-		$group : {
+	model.aggregate()
+		.match( limits )	
+		.group({
 			_id : { 
 				year : { $year : '$date' },
 				month : { $month : '$date' }
 			},
 			average : { $avg : '$virtuals.daily'},
-		}},
-		{$sort : { 
-			_id : 1
-		}}
-	).exec(function(err, results) {
-		if (err) {
-			callback(err);
-		}
-		callback(null, results);
+		})
+		.sort({ _id : 1 })
+		.exec(function(err, results) {
+			if (err) {
+				callback(err);
+			}
+			callback(null, results);
 	});
 };
 
