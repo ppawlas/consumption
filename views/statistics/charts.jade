@@ -4,9 +4,15 @@ block content
 	h1= title
 
 	script(src='/javascripts/jquery-2.0.3.min.js')	
+	script(src='/javascripts/jquery-ui-1.10.3.custom.min.js')
 	script(src='/javascripts/d3.min.js')		
+
+	div(id='chart')
+	div(id='slider')
+
 	script.
 		$(document).ready(function() {
+
 			function prepare(json) {
 				function nullify(usage) {
 					return usage ? usage : null;
@@ -41,28 +47,74 @@ block content
 
 			var xAxis = d3.svg.axis()
 					.scale(x)
-					.orient('bottom');
+					.orient('bottom')
+					.ticks(10);
 
 			var yAxis = d3.svg.axis()
 					.scale(y)
-					.orient('left');		
+					.orient('left')
+					.ticks(10);		
 
 			var line = d3.svg.line()
 				.x(function(d) { return x(d.date); })
 				.y(function(d) { return y(d.usage); });	
 				
-			var svg = d3.select('body').append('svg')
+			var svg = d3.select('#chart').append('svg')
 					.attr('width', width + margin.left + margin.right)
 					.attr('height', height + margin.top + margin.bottom)
 				.append('g')
 					.attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');						
 
+			var clip = svg.append('defs').append('svg:clipPath')
+					.attr('id', 'clip')
+					.append('svg:rect')
+					.attr('id', 'clip-rect')
+					.attr('x', '0')
+					.attr('y', '0')
+					.attr('width', width)
+					.attr('height', height);
+
 			// from and to are timestamps .getTime()
-			d3.json('/statistics/json?from=1325372400000&to=1356908400000', function(err, json) {
+			d3.json('/statistics/json', function(err, json) {				
 				if (err) {
 					console.warn(err);
 				}
 				var data = prepare(json);
+
+				$( '#slider' ).slider({
+					range: true,
+					min: 0,
+					max: data.length - 1,
+					values: [0, data.length - 1],
+					slide: function(event, ui) {
+						var sliderMax = d3.min([data[ui.values[1]].date, data[data.length - 1].date]);
+						var sliderMin = d3.max([data[ui.values[0]].date, data[0].date]);
+
+						if (sliderMax === sliderMin) {
+							return false;	
+						}
+						var delay = 500;
+
+						x.domain([sliderMin, sliderMax - 1]);
+						svg.transition().duration(delay)
+							.select('.x.axis').call(xAxis);
+						svg.transition().duration(delay)
+							.selectAll('.line').attr('d', function(d) { return line(d.values); })
+						svg.transition().duration(delay)
+							.selectAll('circle')
+							.attr('cx', function(d) { return x(d.date); })
+							.attr('cy', function(d) { return y(d.usage); })
+						svg.transition().duration(delay)
+							.selectAll('text.electricity')
+							.attr('transform', function(d) { return 'translate(' + x(data[ui.values[1]].date) + ',' + y(data[ui.values[1]].electricity) + ')'; })
+						svg.transition().duration(delay)								
+							.selectAll('text.water')
+							.attr('transform', function(d) { return 'translate(' + x(data[ui.values[1]].date) + ',' + y(data[ui.values[1]].water) + ')'; })
+						svg.transition().duration(delay)								
+							.selectAll('text.gas')
+							.attr('transform', function(d) { return 'translate(' + x(data[ui.values[1]].date) + ',' + y(data[ui.values[1]].gas) + ')'; })
+					}
+				});				
 
 				color.domain(d3.keys(data[0]).filter(function(key) { return key !== 'date'; }));
 
@@ -84,11 +136,11 @@ block content
 				svg.append('g')
 						.attr('class', 'x axis')
 						.attr('transform', 'translate(0,' + height + ')')
-						.call(xAxis);
+						.call(xAxis.tickSize(-height, 0, 0));
 
 				svg.append('g')
 						.attr('class', 'y axis')
-						.call(yAxis)
+						.call(yAxis.tickSize(-width, 0, 0))
 					.append('text')
 						.attr('transform', 'rotate(-90)')
 						.attr('y', 6)
@@ -96,21 +148,47 @@ block content
 						.style('text-anchor', 'end')
 						.text('Usage');
 
-				var reading = svg.selectAll(".reading")
+				var reading = svg.selectAll('.reading')
 							.data(readings)
-					.enter().append("g")
-							.attr("class", "reading");						
+					.enter().append('g')
+							.attr('class', 'reading');						
 
-				reading.append("path")
-					.attr("class", "line")
-					.attr("d", function(d) { return line(d.values); })
-					.style("stroke", function(d) { return color(d.name); });
+				reading.append('path')
+					.attr('class', 'line')
+					.attr('clip-path', 'url(#clip)')
+					.attr('d', function(d) { return line(d.values); })
+					.style('stroke', function(d) { return color(d.name); });		
 
-				reading.append("text")
+				reading.append('text')
 						.datum(function(d) { return {name: d.name, value: d.values[d.values.length - 1]}; })
-						.attr("transform", function(d) { return "translate(" + x(d.value.date) + "," + y(d.value.usage) + ")"; })
-						.attr("x", 3)
-						.attr("dy", ".35em")
+						.attr('class', function(d) { return d.name; })
+						.attr('transform', function(d) { return 'translate(' + x(d.value.date) + ',' + y(d.value.usage) + ')'; })
+						.attr('x', 3)
+						.attr('dy', '-.55em')
 						.text(function(d) { return d.name; });
+
+				var points = svg.selectAll('.points')
+							.data(readings)
+					.enter().append('g')
+							.attr('class', function(d) { return 'points ' + d.name });
+
+				var point = points.selectAll('.point')
+							.data(function(d) { return d.values; })
+					.enter().append('circle')				
+							.attr('clip-path', 'url(#clip)')			
+							.attr('cx', function(d) { return x(d.date); })
+							.attr('cy', function(d) { return y(d.usage); })
+							.attr('r', 3)
+							.style('stroke', function(d) { return color(d3.select(this.parentNode).datum().name); })
+							.style('stroke-width', 2)
+							.style('fill', function(d) { return 'white'; })
+							.on('mouseover', function(d) {
+								d3.select(this).transition().attr('r', 6).duration(500);
+								console.log(d);
+							})
+							.on('mouseout', function(d) {
+								d3.select(this).transition().attr('r', 3).duration(500);							
+							});
+
 			});
 		});

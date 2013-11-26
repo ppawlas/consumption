@@ -34,17 +34,16 @@ module.exports = function(app) {
 		return { 'periods': periods, 'data': data };
 	}
 
-	function getStatistics(limits, callback) {
-
+	function getStatistics(callback) {
 		async.parallel([
 				function(next) {
-					GasReading.getStatistics(limits, next);	
+					GasReading.getStatistics(next);	
 				},
 				function(next) {
-					ElectricityReading.getStatistics(limits, next);	
+					ElectricityReading.getStatistics(next);	
 				},
 				function(next) {
-					WaterReading.getStatistics(limits, next);	
+					WaterReading.getStatistics(next);	
 				}
 			],
 			function(err, results) {
@@ -62,21 +61,8 @@ module.exports = function(app) {
 		);
 	}
 
-	function createLimits(query) {
-		var limits = { date: { } };
-		if (query.from) {
-			limits.date.$gte = new Date(parseInt(query.from));
-		}
-		if (query.to) {
-			limits.date.$lte = new Date(parseInt(query.to));
-		}
-		return limits;
-	}
-
 	app.get('/statistics/json', function(req, res, next) {
-		limits = req.query ? createLimits(req.query) : {};
-
-		getStatistics(limits, function(err, merged) {
+		getStatistics(function(err, merged) {
 			if (err) {
 				return next(err);
 			}
@@ -87,9 +73,7 @@ module.exports = function(app) {
 	});
 
 	app.get('/statistics', function(req, res, next) {
-		limits = {};
-
-		getStatistics(limits, function(err, merged) {
+		getStatistics(function(err, merged) {
 			if (err) {
 				return next(err);
 			}

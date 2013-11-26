@@ -1,8 +1,10 @@
 .axis path,
 .axis line {
   fill: none;
-  stroke: #000;
+  stroke: lightgrey;
   shape-rendering: crispEdges;
+  opacity: 0.5;
+
 }
 
 .x.axis path {
@@ -17,4 +19,8 @@
 
 svg {
   font: 10px sans-serif;
+}
+
+#slider {
+	width: 1000px;
 }

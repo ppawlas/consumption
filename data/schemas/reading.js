@@ -334,12 +334,10 @@ ReadingSchema.statics.importData = function(data, callback) {
 	});
 };
 
-ReadingSchema.statics.getStatistics = function(limits, callback) {
-
+ReadingSchema.statics.getStatistics = function(callback) {
 	var model = this;
 
 	model.aggregate()
-		.match( limits )	
 		.group({
 			_id : { 
 				year : { $year : '$date' },
@@ -348,6 +346,7 @@ ReadingSchema.statics.getStatistics = function(limits, callback) {
 			average : { $avg : '$virtuals.daily'},
 		})
 		.sort({ _id : 1 })
+
 		.exec(function(err, results) {
 			if (err) {
 				callback(err);
