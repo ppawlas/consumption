@@ -41,7 +41,19 @@ module.exports.greaterThan = function(first, second) {
 module.exports.locals = function(app) {
 	app.locals.today = function() {
 		var now = new Date();
-		var today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+		var today = now.getFullYear() + '-' + now.getMonth() + '-' + now.getDate();
 		return today;		
 	}
+
+	app.locals.dateString = function(date) {
+		function zfill(part) {
+			part = part.toString();
+			if( part.length === 1 ) {
+				part = '0' + part;
+			}
+			return part;
+		}
+
+		return date.getFullYear() + '-' + zfill(date.getMonth() + 1) + '-' + zfill(date.getDate());
+	}	
 };

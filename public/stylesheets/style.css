@@ -1,17 +1,6 @@
-body {
-  padding: 50px;
-  color: DarkSlateGrey;
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+body { 
+	padding-top: 50px; 
 }
-
-a {
-  color: #00B7FF;
-}
-
-h2.info {
-	color: #2ecc71;	
-}
-
-h2.error {
-	color: #e74c3c;
+.lpadForm {
+	padding-left: 10px;
 }

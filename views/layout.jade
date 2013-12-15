@@ -2,11 +2,17 @@ doctype 5
 html
 	head
 		title= title
-		link(rel='stylesheet', href='/stylesheets/style.css')
+		meta(name='viewport', content='width=device-width', initial-scale=1.0)
+
 		link(rel='stylesheet', href='/stylesheets/jquery-ui-1.10.3.custom.min.css')	
+		link(rel='stylesheet', href='/stylesheets/bootstrap.min.css')
 		link(rel='stylesheet', href='/stylesheets/charts.css')			
+		link(rel='stylesheet', href='/stylesheets/style.css')
 		
 	body
+		script(src='/javascripts/jquery-2.0.3.min.js')	
+		script(src='/javascripts/bootstrap.min.js')
+		script(src='/javascripts/helper.js')			
 		include messages
 		include menu
 		block content

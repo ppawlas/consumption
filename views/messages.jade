@@ -1,5 +1,8 @@
 - if (messages) {
 - 	for(var type in messages) {
-			h2(class=type)= messages[type]
+			- var alertClass = 'alert ' + type + ' alert-dismissable';
+			div(class=alertClass)
+				button(type='button', class='close', data-dismiss='alert', aria-hidden='true') &times;
+				= messages[type]
 -		}
 - }

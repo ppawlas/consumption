@@ -1,10 +1,69 @@
-h3 Menu:&nbsp
-	a(href='/gasReadings') Gas Consumption
-	&nbsp
-	a(href='/gasInvoices') Gas Invoices
-	&nbsp	
-	a(href='/electricityReadings') Electricity
-	&nbsp
-	a(href='/waterReadings') Water
-	&nbsp
-	a(href='/statistics') Statistics	
+nav(class='navbar navbar-inverse navbar-fixed-top' role='navigation')
+	div(class='navbar-header')
+	button(type='button' class='navbar-toggle' data-toggle='collapse' data-target='#bs-example-navbar-collapse-1')
+		span(class='sr-only') Toggle navigation
+		span(class='icon-bar')
+		span(class='icon-bar')
+		span(class='icon-bar')
+	a(class='navbar-brand' href='/') Media Consumption
+
+	div(class='collapse navbar-collapse' id='bs-example-navbar-collapse-1')
+		ul(class='nav navbar-nav')
+			li(class='dropdown')
+				a(href='#', class='dropdown-toggle', data-toggle='dropdown') Gas Consumption
+					b(class='caret')
+				ul(class='dropdown-menu')
+					li
+						a(href='/gasReadings') Index
+					li
+						a(href='/gasReadings/new') New			
+					li
+						a(href='/gasReadings/import') Import		
+
+			li(class='dropdown')
+				a(href='#', class='dropdown-toggle', data-toggle='dropdown') Gas Invoices
+					b(class='caret')
+				ul(class='dropdown-menu')
+					li
+						a(href='/gasInvoices') Index
+					li
+						a(href='/gasInvoices/new') New			
+					li
+						a(href='/gasInvoices/import') Import					
+					li
+						a(href='/heatingCosts') Heating Costs
+
+			li(class='dropdown')
+				a(href='#', class='dropdown-toggle', data-toggle='dropdown') Electricity
+					b(class='caret')
+				ul(class='dropdown-menu')
+					li
+						a(href='/electricityReadings') Index
+					li
+						a(href='/electricityReadings/new') New						
+					li
+						a(href='/electricityReadings/import') Import								
+					li			
+						a(href='/electricityCharges') Electricity Charges
+				
+			li(class='dropdown')
+				a(href='#', class='dropdown-toggle', data-toggle='dropdown') Water
+					b(class='caret')
+				ul(class='dropdown-menu')
+					li
+						a(href='/waterReadings') Index
+					li
+						a(href='/waterReadings/new') New								
+					li
+						a(href='/waterReadings/import') Import							
+				
+
+			li(class='dropdown')
+				a(href='#', class='dropdown-toggle', data-toggle='dropdown') Statistics
+					b(class='caret')
+				ul(class='dropdown-menu')
+					li
+						a(href='/statistics') Statistics	
+					li			
+						a(href='/statistics/charts') Charts
+

@@ -79,7 +79,6 @@ module.exports = function(app) {
 			}
 			res.render('statistics/index', {
 				title: 'Statistics',
-				links: [{ href: '/statistics/charts', name: 'Charts' }],
 				periods: merged.periods,
 				data: merged.data
 			});

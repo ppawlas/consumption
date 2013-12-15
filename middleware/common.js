@@ -9,14 +9,14 @@ module.exports.setUsage = function(req, res, next) {
 
 module.exports.loadReading = function(model) {
 	return function(req, res, next) {
-		model.findOne({ _id: req.params.id }, function(err, gasInvoice) {
+		model.findOne({ _id: req.params.id }, function(err, reading) {
 			if (err) {
 				return next(err);
 			}
-			if (! gasInvoice) {
+			if (! reading) {
 				return res.send('Not found', 404);
 			}
-			req.reading = gasInvoice;
+			req.reading = reading;
 			next();		
 		});
 	};

@@ -1,11 +1,11 @@
 extends ../layout
 
 block content
-	h1= title
+	div(class='page-header')
+		h1= title
 
-	script(src='/javascripts/jquery-2.0.3.min.js')	
 	script(src='/javascripts/jquery-ui-1.10.3.custom.min.js')
-	script(src='/javascripts/d3.min.js')		
+	script(src='/javascripts/d3.min.js')
 
 	div(id='chart')
 	div(id='slider')
@@ -41,7 +41,7 @@ block content
 					.range([0, width - 40]);
 
 			var y = d3.scale.linear()
-					.range([height, 0]);
+					.range([height - 10 , 10]);
 
 			var color = d3.scale.category10();					
 

@@ -4,7 +4,7 @@ var async = require('async');
 var common = require('../middleware/common');
 
 module.exports.getFlashMessages = function(req) {
-	var types = ['info', 'error'];
+	var types = ['alert-success', 'alert-danger'];
 	var messages = {};
 	types.forEach(function(type) {
 		var message = req.flash(type);
@@ -31,12 +31,12 @@ module.exports.importData = function(app, model, controllerPath) {
 						if (err) {
 							return next(err);
 						}
-						req.flash('info', 'Data has been loaded successfully!');
+						req.flash('alert-success', 'Data has been loaded successfully!');
 						res.redirect(controllerPath);				
 					});				
 				});
 			} else {
-				req.flash('error', 'Data has not been loaded!');
+				req.flash('alert-danger', 'Data has not been loaded!');
 				res.redirect(controllerPath);	
 			}
 		});
@@ -96,6 +96,15 @@ module.exports.getReadings = function(app, model, controllerPath, title, links) 
 	});
 };
 
+module.exports.getImport = function(app, model, controllerPath, title) {
+	app.get(controllerPath + '/import', function(req, res, next) {
+		res.render('readings/import', {
+			title: title,
+			controllerPath: controllerPath
+		});
+	});
+};
+
 module.exports.getNewReading = function(app, controllerPath, title) {
 	title = typeof title !== 'undefined' ? title : 'New reading';
 
@@ -128,7 +137,7 @@ module.exports.putReading = function(app, model, controllerPath, redirectPath) {
 				if (err) {
 					return next(err);
 				}
-				req.flash('info', 'Data has updated successfully!');
+				req.flash('alert-success', 'Data has been updated successfully!');
 				res.redirect(redirectPath);
 			}
 		);
@@ -141,7 +150,7 @@ module.exports.delReading = function(app, model, middleware, controllerPath) {
 			if(err) {
 				return next(err);
 			}
-			req.flash('info', 'Data has deleted successfully!');
+			req.flash('alert-success', 'Data has deleted successfully!');
 			res.redirect(controllerPath);
 		});
 	});	
@@ -153,14 +162,15 @@ module.exports.postReading = function(app, model, controllerPath) {
 			if (err) {
 				return next(err);
 			}
-			req.flash('info', 'Data has been created successfully!');
+			req.flash('alert-success', 'Data has been created successfully!');
 			res.redirect(controllerPath);
 		});
 	});	
 };
 
-module.exports.setRoutes = function(app, model, middleware, controllerPath, titles, links) {
-	this.getReadings(app, model, controllerPath, titles.index, links);
+module.exports.setRoutes = function(app, model, middleware, controllerPath, titles) {
+	this.getReadings(app, model, controllerPath, titles.index);
+	this.getImport(app, model, controllerPath, titles.index);
 	this.getNewReading(app, controllerPath, titles.new);
 	this.getReading(app, middleware, controllerPath, titles.edit);
 	this.putReading(app, model, controllerPath);
