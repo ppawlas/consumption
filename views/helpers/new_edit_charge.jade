@@ -1,0 +1,22 @@
+extends ../layout
+
+block content
+	div(class='page-header')
+		h1= title
+
+	div(class='lpadForm')
+		form(role='form', method='POST', action='electricityCharges/' + encodeURIComponent(electricityCharges._id))
+			- labels.forEach(function(label) {
+				div(class='row')
+					div(class='form-group col-xs-5 col-lg-2')
+						label(for=label)= label 
+						input(type='text', class='form-control', id=label, name=label, value=electricityCharge[label])
+			-	});
+
+			div(class='row')
+				div(class='form-group col-xs-5 col-lg-2')
+					label(for='appliesFrom') Applies from:
+					input(type='date', class='form-control', id='appliesFrom', name='appliesFrom', value=electricityCharge['appliesFrom'])		
+
+			button(type='submit', class='btn btn-default') Save
+			input(name='_method', type='hidden', value='PUT')

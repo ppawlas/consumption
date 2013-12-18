@@ -28,12 +28,14 @@ module.exports = function(app) {
 				if (err) {
 					return next(err);
 				}
-				var electricityCharge = results[0];
+				var electricityCharges = results[0];
 				var labels = results[1];	
+				console.log(electricityCharges);
 
 				res.render('helpers/charges', {
 					title: 'Electricity Charges',
-					electricityCharge: electricityCharge,					
+					controllerPath: '/electricityCharges',
+					electricityCharges: electricityCharges,					
 					labels: labels
 				});
 			});

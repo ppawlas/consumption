@@ -4,19 +4,32 @@ block content
 	div(class='page-header')
 		h1= title
 
-	div(class='lpadForm')
-		form(role='form', method='POST', action='electricityCharges/' + encodeURIComponent(electricityCharge._id))
-			- labels.forEach(function(label) {
-				div(class='row')
-					div(class='form-group col-xs-5 col-lg-2')
-						label(for=label)= label 
-						input(type='text', class='form-control', id=label, name=label, value=electricityCharge[label])
-			-	});
-
-			div(class='row')
-				div(class='form-group col-xs-5 col-lg-2')
-					label(for='appliesFrom') Applies from:
-					input(type='date', class='form-control', id='appliesFrom', name='appliesFrom', value=electricityCharge['appliesFrom'])		
-
-			button(type='submit', class='btn btn-default') Save
-			input(name='_method', type='hidden', value='PUT')
+	div(class='row')
+		div(class='col-xs-4 col-lg-4')
+			table(class='table table-striped table-condensed')
+				thead
+					- labels.forEach(function(label) {
+						th= label
+					- });
+					th Applies from
+					th &nbsp
+				- electricityCharges.forEach(function(electricityCharge) {													
+					- labels.forEach(function(label) {
+						td= round(electricityCharge[label])
+					- });
+					td= electricityCharge['appliesFrom']
+					td
+						form(action=controllerPath + '/' + encodeURIComponent(electricityCharge._id), method='GET')
+							- if(electricityCharge['appliesFrom'])
+								button(type='submit', class='btn btn-primary', disabled) Edit
+							- else
+								button(type='submit', class='btn btn-primary') Edit
+				- });
+				tr
+					- labels.forEach(function(label) {
+						td &nbsp
+					- });
+					td &nbsp
+					td
+						form(action=controllerPath + '/new', method='GET')
+							button(type='submit', class='btn btn-default') New				

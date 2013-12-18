@@ -7,9 +7,8 @@ $( document ).ready(function() {
 	var pathname = window.location.pathname;
 	if( pathname.split('/').length > 1) {
 		var activePath = pathname.split('/').length > 2 ? pathname.split('/')[1] : pathname;
-		console.log(activePath);
 		if(activePath.length > 1) {
-			$('a[href*="' + activePath +'"').closest('.dropdown').addClass('active');
+			$('a[href*="' + activePath +'"]').closest('.dropdown').addClass('active');
 		}
 	}
 });

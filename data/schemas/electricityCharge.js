@@ -45,21 +45,24 @@ ElectricityChargeSchema.statics.getLabels = function(callback) {
 
 ElectricityChargeSchema.statics.findExtended = function(callback) {
 	var model = this;
-	model.findOne({ }, function(err, electricityCharge) {
-		if (err) {
-			return callback(err);
-		}
-		if (! electricityCharge) {
-			model.create({ }, function(err, electricityCharge) {
-				if (err) {
-					return callback(err);
-				}
-				return callback(null, electricityCharge);
-			});
-		} else {
-			return callback(null, electricityCharge);
-		}
-	});
+	model.find({ })
+		.sort('appliesFrom')
+		.exec(function(err, electricityCharges) {
+			if (err) {
+				return callback(err);
+			}
+			if (! electricityCharges) {
+				model.create({ }, function(err, electricityCharge) {
+					if (err) {
+						return callback(err);
+					}
+					// return as array to preserve the convention
+					return callback(null, [electricityCharge]);
+				});
+			} else {
+				return callback(null, electricityCharges);
+			}			
+		});
 };
 
 ElectricityChargeSchema.statics.updateExtended = function(charges, id, callback) {
