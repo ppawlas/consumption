@@ -6,7 +6,7 @@
 module.exports = function(app) {
 
 	app.get('/', function(req, res){
-		res.render('index', { title: 'Media Consumption' });
+		res.render('index', { title: res.__('Media Consumption') });
 	});
 
 };

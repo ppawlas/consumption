@@ -5,13 +5,13 @@ block content
 		h1= title
 
 	div(class='row')
-		div(class='col-xs-4 col-lg-4')
+		div(class='col-xs-5 col-lg-5')
 			table(class='table table-striped table-condensed')
 				thead
 					- labels.forEach(function(label) {
-						th= label
+						th= __(label)
 					- });
-					th Applies from
+					th= __('Applies from')
 					th &nbsp
 				- electricityCharges.forEach(function(electricityCharge) {													
 					- labels.forEach(function(label) {
@@ -23,7 +23,7 @@ block content
 							- if(electricityCharge['appliesFrom'])
 								button(type='submit', class='btn btn-primary', disabled) Edit
 							- else
-								button(type='submit', class='btn btn-primary') Edit
+								button(type='submit', class='btn btn-primary')= __('Edit')
 				- });
 				tr
 					- labels.forEach(function(label) {
@@ -32,4 +32,4 @@ block content
 					td &nbsp
 					td
 						form(action=controllerPath + '/new', method='GET')
-							button(type='submit', class='btn btn-default') New				
+							button(type='submit', class='btn btn-default')= __('New')

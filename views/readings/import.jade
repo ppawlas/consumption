@@ -7,6 +7,6 @@ block content
 	div(class='lpadForm')
 		form(class='form-inline', role='form', method='POST', action=controllerPath + '/import', enctype='multipart/form-data')
 			div(class='form-group')
-				label(class='sr-only', for='import') File input
+				label(class='sr-only', for='import')= __('File input')
 				input(type='file', id='import', name='import', multiple='multiple')
-			button(type='submit', class='btn btn-default') Import
+			button(type='submit', class='btn btn-default')= __('Import')

@@ -31,12 +31,12 @@ module.exports.importData = function(app, model, controllerPath) {
 						if (err) {
 							return next(err);
 						}
-						req.flash('alert-success', 'Data has been loaded successfully!');
+						req.flash('alert-success', res.__('Data has been loaded successfully!'));
 						res.redirect(controllerPath);				
 					});				
 				});
 			} else {
-				req.flash('alert-danger', 'Data has not been loaded!');
+				req.flash('alert-danger', res.__('Data has not been loaded!'));
 				res.redirect(controllerPath);	
 			}
 		});
@@ -82,7 +82,7 @@ module.exports.getReadings = function(app, model, controllerPath, title, links) 
 				var lastPage = (page + 1) * maxPerPage >= count;
 
 				res.render('readings/index', {
-					title: title,
+					title: res.__(title),
 					controllerPath: controllerPath + '/',
 					labels: labels,
 					readings: readings, 
@@ -99,7 +99,7 @@ module.exports.getReadings = function(app, model, controllerPath, title, links) 
 module.exports.getImport = function(app, model, controllerPath, title) {
 	app.get(controllerPath + '/import', function(req, res, next) {
 		res.render('readings/import', {
-			title: title,
+			title: res.__(title),
 			controllerPath: controllerPath
 		});
 	});
@@ -110,7 +110,7 @@ module.exports.getNewReading = function(app, controllerPath, title) {
 
 	app.get(controllerPath + '/new', function(req, res, next) {
 		res.render('readings/new_edit', {
-			title: title,
+			title: res.__(title),
 			controllerPath: controllerPath,
 			labels: req.labels
 		});
@@ -122,7 +122,7 @@ module.exports.getReading = function(app, middleware, controllerPath, title) {
 
 	app.get(controllerPath + '/:id', middleware.loadReading, function(req, res, next) {
 		res.render('readings/new_edit', {
-			title: title,
+			title: res.__(title),
 			controllerPath: controllerPath,
 			reading: req.reading
 		});
@@ -137,7 +137,7 @@ module.exports.putReading = function(app, model, controllerPath, redirectPath) {
 				if (err) {
 					return next(err);
 				}
-				req.flash('alert-success', 'Data has been updated successfully!');
+				req.flash('alert-success', res.__('Data has been updated successfully!'));
 				res.redirect(redirectPath);
 			}
 		);
@@ -150,7 +150,7 @@ module.exports.delReading = function(app, model, middleware, controllerPath) {
 			if(err) {
 				return next(err);
 			}
-			req.flash('alert-success', 'Data has deleted successfully!');
+			req.flash('alert-success', res.__('Data has deleted successfully!'));
 			res.redirect(controllerPath);
 		});
 	});	
@@ -162,7 +162,7 @@ module.exports.postReading = function(app, model, controllerPath) {
 			if (err) {
 				return next(err);
 			}
-			req.flash('alert-success', 'Data has been created successfully!');
+			req.flash('alert-success', res.__('Data has been created successfully!'));
 			res.redirect(controllerPath);
 		});
 	});	

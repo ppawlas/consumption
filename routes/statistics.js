@@ -78,7 +78,7 @@ module.exports = function(app) {
 				return next(err);
 			}
 			res.render('statistics/index', {
-				title: 'Statistics',
+				title: res.__('Means'),
 				periods: merged.periods,
 				data: merged.data
 			});
@@ -87,7 +87,7 @@ module.exports = function(app) {
 
 	app.get('/statistics/charts', function(req, res, next) {
 			res.render('statistics/charts', {
-				title: 'Charts'
+				title: res.__('Chart')
 			});
 	});	
 

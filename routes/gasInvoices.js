@@ -21,7 +21,7 @@ module.exports = function(app) {
 				return next(err);
 			}
 			res.render('helpers/costs', {
-				title: 'Heating Costs',
+				title: res.__('Heating Costs'),
 				heatingCosts: costs				
 			});			
 		});

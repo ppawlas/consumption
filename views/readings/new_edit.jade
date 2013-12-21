@@ -10,7 +10,7 @@ block content
 		form(role='form', method='POST', action=controllerPath + actionPath)
 			include inputs
 
-			button(type='submit', class='btn btn-default') Save
+			button(type='submit', class='btn btn-default')= __('Save')
 
 			- if (reading) {
 				input(name='_method', type='hidden', value='PUT')

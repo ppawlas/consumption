@@ -1,75 +1,75 @@
 nav(class='navbar navbar-inverse navbar-fixed-top' role='navigation')
 	div(class='navbar-header')
 	button(type='button' class='navbar-toggle' data-toggle='collapse' data-target='#bs-example-navbar-collapse-1')
-		span(class='sr-only') Toggle navigation
+		span(class='sr-only')= __('Toggle navigation')
 		span(class='icon-bar')
 		span(class='icon-bar')
 		span(class='icon-bar')
-	a(class='navbar-brand' href='/') Media Consumption
+	a(class='navbar-brand' href='/')= __('Media Consumption')
 
 	div(class='collapse navbar-collapse' id='bs-example-navbar-collapse-1')
 		ul(class='nav navbar-nav')
 			li(class='dropdown')
-				a(href='#', class='dropdown-toggle', data-toggle='dropdown') Gas Consumption
+				a(href='#', class='dropdown-toggle', data-toggle='dropdown')= __('Gas Consumption')
 					b(class='caret')
 				ul(class='dropdown-menu')
 					li
-						a(href='/gasReadings') Index
+						a(href='/gasReadings')= __('Table')
 					li
-						a(href='/gasReadings/new') New			
+						a(href='/gasReadings/new')= __('New reading')
 					li(class='divider')
 					li
-						a(href='/gasReadings/import') Import		
+						a(href='/gasReadings/import')= __('Import')
 
 			li(class='dropdown')
-				a(href='#', class='dropdown-toggle', data-toggle='dropdown') Gas Invoices
+				a(href='#', class='dropdown-toggle', data-toggle='dropdown')= __('Gas Invoices')
 					b(class='caret')
 				ul(class='dropdown-menu')
 					li
-						a(href='/gasInvoices') Index
+						a(href='/gasInvoices')= __('Table')
 					li
-						a(href='/gasInvoices/new') New			
+						a(href='/gasInvoices/new')= __('New invoice')
 					li(class='divider')
 					li
-						a(href='/gasInvoices/import') Import					
+						a(href='/gasInvoices/import')= __('Import')
 					li(class='divider')
 					li
-						a(href='/heatingCosts') Heating Costs
+						a(href='/heatingCosts')= __('Heating Costs')
 
 			li(class='dropdown')
-				a(href='#', class='dropdown-toggle', data-toggle='dropdown') Electricity
+				a(href='#', class='dropdown-toggle', data-toggle='dropdown')= __('Electricity')
 					b(class='caret')
 				ul(class='dropdown-menu')
 					li
-						a(href='/electricityReadings') Index
+						a(href='/electricityReadings')= __('Table')
 					li
-						a(href='/electricityReadings/new') New
+						a(href='/electricityReadings/new')= __('New reading')
 					li(class='divider')				
 					li
-						a(href='/electricityReadings/import') Import								
+						a(href='/electricityReadings/import')= __('Import')
 					li(class='divider')
 					li			
-						a(href='/electricityCharges') Electricity Charges
+						a(href='/electricityCharges')= __('Electricity Charges')
 				
 			li(class='dropdown')
-				a(href='#', class='dropdown-toggle', data-toggle='dropdown') Water
+				a(href='#', class='dropdown-toggle', data-toggle='dropdown')= __('Water')
 					b(class='caret')
 				ul(class='dropdown-menu')
 					li
-						a(href='/waterReadings') Index
+						a(href='/waterReadings')= __('Table')
 					li
-						a(href='/waterReadings/new') New								
+						a(href='/waterReadings/new')= __('New reading')
 					li(class='divider')
 					li
-						a(href='/waterReadings/import') Import							
+						a(href='/waterReadings/import')= __('Import')
 				
 
 			li(class='dropdown')
-				a(href='#', class='dropdown-toggle', data-toggle='dropdown') Statistics
+				a(href='#', class='dropdown-toggle', data-toggle='dropdown')= __('Statistics')
 					b(class='caret')
 				ul(class='dropdown-menu')
 					li
-						a(href='/statistics') Statistics	
+						a(href='/statistics')= __('Means')
 					li			
-						a(href='/statistics/charts') Charts
+						a(href='/statistics/charts')= __('Chart')
 

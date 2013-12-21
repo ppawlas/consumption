@@ -1,25 +1,25 @@
 div(class='row')
 	div(class='form-group col-xs-5 col-lg-2')
-		label(for='date') Date
+		label(for='date')= __('Date')
 		input(type='date', class='form-control', id='date', name='date' value=reading ? dateString(reading['date']) : today())
 
 div(class='row')			
 	div(class='form-group col-xs-5 col-lg-2')
-		label(for='state') State
+		label(for='state')= __('State')
 		input(type='text', class='form-control', id='state', name='state' value=reading && reading['state'])
 
 div(class='checkbox')
-	label Fixed
+	label= __('Fixed')
 		input(type='checkbox', id='fixed', name='fixed' checked=reading && reading['fixed'])
 
 div(class='row')		
 	div(class='form-group col-xs-5 col-lg-2')
-		label(for='usage') Usage
+		label(for='usage')= __('Usage')
 		input(type='text', class='form-control', id='usage', name='usage' disabled=! reading || ! reading['fixed'] value=reading && reading['usage'])
 
 div(class='row')
 	- if (controllerPath === '/gasInvoices') {
 		div(class='form-group col-xs-5 col-lg-2')
-			label(for='charge') Charge
+			label(for='charge')= __('Charge')
 			input(type='text', class='form-control', id='charge', name='charge' value=reading && reading['charge'])
 	-	}

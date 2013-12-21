@@ -12,6 +12,7 @@
     "mongoose": "3.8.0",
     "mongoose-schema-extend": "*",
     "formidable": "*",
-    "connect-flash": "*"
+    "connect-flash": "*",
+    "i18n": "*"
   }
 }

@@ -7,11 +7,19 @@ var express = require('express');
 var http = require('http');
 var path = require('path');
 var flash = require('connect-flash');
+var i18n = require('i18n');
 
 var dbURL = 'mongodb://localhost/mydb';
 var db = require('mongoose').connect(dbURL);
 
 var app = express();
+
+// i18n configure
+i18n.configure({
+	locales: ['en', 'pl'],
+	cookie: 'i18nCookie',
+	directory: path.join(__dirname, 'locales')
+});
 
 // all environments
 app.set('port', process.env.PORT || 3000);
@@ -25,6 +33,7 @@ app.use(express.methodOverride());
 app.use(express.cookieParser('lazy otter'));
 app.use(express.session({ maxAge: 60000 }));
 app.use(flash());
+app.use(i18n.init); // Should always before app.route
 app.use(app.router);
 app.use(express.static(path.join(__dirname, 'public')));
 

@@ -33,7 +33,7 @@ module.exports = function(app) {
 				console.log(electricityCharges);
 
 				res.render('helpers/charges', {
-					title: 'Electricity Charges',
+					title: res.__('Electricity Charges'),
 					controllerPath: '/electricityCharges',
 					electricityCharges: electricityCharges,					
 					labels: labels
