@@ -54,6 +54,10 @@ module.exports.locals = function(app) {
 	}
 
 	app.locals.dateString = function(date) {
-		return date.getFullYear() + '-' + zfill(date.getMonth() + 1) + '-' + zfill(date.getDate());
+		if (date) {
+			return date.getFullYear() + '-' + zfill(date.getMonth() + 1) + '-' + zfill(date.getDate());
+		} else {
+			return null;
+		}
 	}	
 };

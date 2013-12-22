@@ -51,7 +51,7 @@ ElectricityChargeSchema.statics.findExtended = function(callback) {
 			if (err) {
 				return callback(err);
 			}
-			if (! electricityCharges) {
+			if (electricityCharges.length === 0) {
 				model.create({ }, function(err, electricityCharge) {
 					if (err) {
 						return callback(err);
@@ -65,15 +65,42 @@ ElectricityChargeSchema.statics.findExtended = function(callback) {
 		});
 };
 
+ElectricityChargeSchema.statics.findApplied = function(callback) {
+
+};
+
+ElectricityChargeSchema.statics.updateReadings = function(err, docs) {
+	var ElectricityReading = require('../models/electricityReading');
+	async.forEachSeries(docs, ElectricityReading.updateExtendedWrapper.bind(ElectricityReading), function(err) {
+		if (err) {
+			return err;
+		}
+		return null;
+	});				
+};
+
+ElectricityChargeSchema.statics.createExtended = function(electricityCharge, callback) {
+	var model = this;
+	var ElectricityReading = require('../models/electricityReading');
+
+	model.create(electricityCharge, function(err, electricityCharge) {
+		if (err) {
+			return callback(err);
+		}
+		ElectricityReading.find({ date : { $gte: electricityCharge.appliesFrom }}, model.updateReadings);		
+	});
+};
+
 ElectricityChargeSchema.statics.updateExtended = function(charges, id, callback) {
 	function updateReadings(err, docs) {
+		var ElectricityReading = require('../models/electricityReading');
 		async.forEachSeries(docs, ElectricityReading.updateExtendedWrapper.bind(ElectricityReading), function(err) {
 			if (err) {
 				return callback(err);
 			}
 			return callback(null);
 		});				
-	}
+	};
 
 	var model = this;	
 	var ElectricityReading = require('../models/electricityReading');

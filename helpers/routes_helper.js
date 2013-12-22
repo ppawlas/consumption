@@ -105,24 +105,23 @@ module.exports.getImport = function(app, model, controllerPath, title) {
 	});
 };
 
-module.exports.getNewReading = function(app, controllerPath, title) {
-	title = typeof title !== 'undefined' ? title : 'New reading';
+module.exports.getNewReading = function(app, controllerPath, titles) {
+	titles.new = typeof titles.new !== 'undefined' ? titles.new : 'New reading';
 
 	app.get(controllerPath + '/new', function(req, res, next) {
 		res.render('readings/new_edit', {
-			title: res.__(title),
-			controllerPath: controllerPath,
-			labels: req.labels
+			title: res.__(titles.index) + ' - ' + res.__(titles.new),
+			controllerPath: controllerPath
 		});
 	});
 };
 
-module.exports.getReading = function(app, middleware, controllerPath, title) {
-	title = typeof title !== 'undefined' ? title : 'Edit reading';
+module.exports.getReading = function(app, middleware, controllerPath, titles) {
+	titles.edit = typeof titles.edit !== 'undefined' ? titles.edit : 'Edit reading';
 
 	app.get(controllerPath + '/:id', middleware.loadReading, function(req, res, next) {
 		res.render('readings/new_edit', {
-			title: res.__(title),
+			title: res.__(titles.index) + ' - ' + res.__(titles.edit),
 			controllerPath: controllerPath,
 			reading: req.reading
 		});
@@ -171,8 +170,8 @@ module.exports.postReading = function(app, model, controllerPath) {
 module.exports.setRoutes = function(app, model, middleware, controllerPath, titles) {
 	this.getReadings(app, model, controllerPath, titles.index);
 	this.getImport(app, model, controllerPath, titles.index);
-	this.getNewReading(app, controllerPath, titles.new);
-	this.getReading(app, middleware, controllerPath, titles.edit);
+	this.getNewReading(app, controllerPath, titles);
+	this.getReading(app, middleware, controllerPath, titles);
 	this.putReading(app, model, controllerPath);
 	this.delReading(app, model, middleware, controllerPath);
 	this.postReading(app, model, controllerPath);

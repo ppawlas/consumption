@@ -41,6 +41,41 @@ module.exports = function(app) {
 			});
 	});
 
-	routesHelper.putReading(app, ElectricityCharge, '/electricityCharges', '/electricityReadings');
+	app.get('/electricityCharges/new', middleware.loadLabels, function(req, res, next) {
+		res.render('helpers/new_edit_charge', {
+			title: res.__('Electricity Charges') + ' - ' + res.__('New'),
+			labels: req.labels
+		});
+	});
+
+	app.get('/electricityCharges/:id', middleware.loadLabels, middleware.loadCharge, function(req, res, next) {
+		res.render('helpers/new_edit_charge', {
+			title: res.__('Electricity Charges') + ' - ' + res.__('Edit'),
+			labels: req.labels,
+			electricityCharge: req.reading
+		});		
+	});	
+
+	app.put('/electricityCharges/:id', function(req, res, next) {
+		ElectricityCharge.updateExtended(req.body, req.params.id,
+			function(err) {
+				if (err) {
+					return next(err);
+				}
+				req.flash('alert-success', res.__('Data has been updated successfully!'));
+				res.redirect('/electricityCharges');
+			}
+		);
+	});
+
+	app.post('/electricityCharges', function(req, res, next) {
+		ElectricityCharge.createExtended(req.body, function(err) {
+			if (err) {
+				return next(err);
+			}
+			req.flash('alert-success', res.__('Data has been created successfully!'));
+			res.redirect('/electricityCharges');
+		});
+	});	
 
 };

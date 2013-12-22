@@ -13,17 +13,18 @@ block content
 					- });
 					th= __('Applies from')
 					th &nbsp
-				- electricityCharges.forEach(function(electricityCharge) {													
-					- labels.forEach(function(label) {
-						td= round(electricityCharge[label])
-					- });
-					td= electricityCharge['appliesFrom']
-					td
-						form(action=controllerPath + '/' + encodeURIComponent(electricityCharge._id), method='GET')
-							- if(electricityCharge['appliesFrom'])
-								button(type='submit', class='btn btn-primary', disabled) Edit
-							- else
-								button(type='submit', class='btn btn-primary')= __('Edit')
+				- electricityCharges.forEach(function(electricityCharge) {
+					tr
+						- labels.forEach(function(label) {
+							td= round(electricityCharge[label])
+						- });
+						td= electricityCharge['appliesFrom']
+						td
+							form(action=controllerPath + '/' + encodeURIComponent(electricityCharge._id), method='GET')
+								- if(electricityCharge['appliesFrom'])
+									button(type='submit', class='btn btn-primary', disabled)= __('Edit')
+								- else
+									button(type='submit', class='btn btn-primary')= __('Edit')
 				- });
 				tr
 					- labels.forEach(function(label) {
