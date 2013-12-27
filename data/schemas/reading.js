@@ -70,7 +70,7 @@ ReadingSchema.statics.findExtended = function(options, callback) {
 	var model = this;
 	// find readings for the given page
 	model.find({ })
-		.sort('date')
+		.sort('-date')
 		.skip(options.page * options.maxPerPage)
 		.limit(options.maxPerPage)
 		.exec(function(err, result) {
@@ -345,7 +345,7 @@ ReadingSchema.statics.getStatistics = function(callback) {
 			},
 			average : { $avg : '$virtuals.daily'},
 		})
-		.sort({ _id : 1 })
+		.sort({ _id : -1 })
 
 		.exec(function(err, results) {
 			if (err) {

@@ -63,7 +63,7 @@ GasInvoiceSchema.statics.findCosts = function(callback) {
 			usage : { $sum : '$usage'}
 		}},
 		{$sort : { 
-			_id : 1
+			_id : -1
 		}}
 	).exec(function(err, results) {
 		if (err) {
