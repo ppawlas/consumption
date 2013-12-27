@@ -6,7 +6,7 @@ block content
 
 	- var actionPath = electricityCharge ? '/' + encodeURIComponent(electricityCharge._id) : '';		
 
-	div(class='lpadForm')
+	div
 		form(role='form', method='POST', action='/electricityCharges' + actionPath)
 			- labels.forEach(function(label) {
 				div(class='row')

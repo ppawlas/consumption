@@ -6,7 +6,7 @@ block content
 
 	- var actionPath = reading ? '/' + encodeURIComponent(reading._id) : '';
 
-	div(class='lpadForm')
+	div
 		form(role='form', method='POST', action=controllerPath + actionPath)
 			include inputs
 
