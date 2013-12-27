@@ -15,11 +15,11 @@ block content
 							include tbody
 							td
 								form(action=controllerPath + encodeURIComponent(reading._id), method='GET')
-									button(type='submit', class='btn btn-primary')= __('Edit')
+									button(type='submit', class='btn btn-default')= __('Edit')
 							td
 								form(action=controllerPath + encodeURIComponent(reading._id), method='POST')
 									input(name='_method', type='hidden', value='DELETE')
-									button(type='submit', class='btn btn-danger')= __('Delete')
+									button(type='submit', class='btn btn-default')= __('Delete')
 					- });		
 
 	include paging
