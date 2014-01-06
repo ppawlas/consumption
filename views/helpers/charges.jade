@@ -12,25 +12,28 @@ block content
 						th= __(label)
 					- });
 					th= __('Applies from')
+					th= __('Applies to')
 					th &nbsp
-				- electricityCharges.forEach(function(electricityCharge) {
-					tr
-						- labels.forEach(function(label) {
-							td= round(electricityCharge[label])
-						- });
-						td= electricityCharge['appliesFrom']
-						td
-							form(action=controllerPath + '/' + encodeURIComponent(electricityCharge._id), method='GET')
-								- if(electricityCharge['appliesFrom'])
-									button(type='submit', class='btn btn-primary', disabled)= __('Edit')
-								- else
-									button(type='submit', class='btn btn-primary')= __('Edit')
-				- });
 				tr
 					- labels.forEach(function(label) {
 						td &nbsp
 					- });
 					td &nbsp
+					td &nbsp
 					td
 						form(action=controllerPath + '/new', method='GET')
-							button(type='submit', class='btn btn-default')= __('New')
+							button(type='submit', class='btn btn-default')= __('New')					
+				- electricityCharges.forEach(function(electricityCharge) {
+					tr
+						- labels.forEach(function(label) {
+							td= round(electricityCharge[label])
+						- });
+						td= dateString(electricityCharge['appliesFrom'])
+						td= dateString(electricityCharge['appliesTo'])
+						td
+							form(action=controllerPath + '/' + encodeURIComponent(electricityCharge._id), method='GET')
+								- if(electricityCharge['appliesTo'])
+									button(type='submit', class='btn btn-primary', disabled)= __('Edit')
+								- else
+									button(type='submit', class='btn btn-primary')= __('Edit')
+				- });

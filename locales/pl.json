@@ -52,5 +52,8 @@
 	"Sop": "Sop",
 	"SoSJ": "SoSJ",
 	"Os": "Os",
-	"Applies from": "Obowiązuje od"
+	"Applies from": "Obowiązuje od",
+	"Data has been updated successfully test!": "Data has been updated successfully test!",
+	"Applies to": "Obowiązuje do",
+	"New date must be greater than the previous one": "Nowa data musi być większa niż poprzednia"
 }

@@ -75,17 +75,16 @@ ElectricityReadingSchema.statics.getVirtuals = function(previousReading, reading
 	var virtuals = {};
 
 	if (previousReading !== null) {
-		ElectricityCharge.findApplied(function(err, electricityCharge) {
+		ElectricityCharge.findApplied(reading.date, function(err, electricityCharges) {
 			if (err) {
 				return callback(err);
 			}
-			console.log(electricityCharge);
+			var electricityCharge = electricityCharges[0];
+
 			virtuals.daily = usage / datetime.daysDiff(reading.date, previousReading.date);
 			virtuals.monthPrediction = virtuals.daily * datetime.daysInMonth(reading.date);
 			virtuals.yearPrediction = virtuals.daily * datetime.daysInYear(reading.date);			
 			virtuals.yearCharge = calculateCharge(virtuals.yearPrediction, electricityCharge);
-			console.log('virtuals.yearCharge', virtuals.yearCharge);
-			console.log('electricityCharge.Os', electricityCharge.Os);
 			virtuals.monthsCharge = virtuals.yearCharge / 6 + electricityCharge.Os;
 
 			return callback(err, virtuals);		

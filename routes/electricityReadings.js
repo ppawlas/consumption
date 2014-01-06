@@ -30,13 +30,13 @@ module.exports = function(app) {
 				}
 				var electricityCharges = results[0];
 				var labels = results[1];	
-				console.log(electricityCharges);
 
 				res.render('helpers/charges', {
 					title: res.__('Electricity Charges'),
 					controllerPath: '/electricityCharges',
 					electricityCharges: electricityCharges,					
-					labels: labels
+					labels: labels,
+					messages: routesHelper.getFlashMessages(req)
 				});
 			});
 	});
@@ -71,7 +71,7 @@ module.exports = function(app) {
 	app.post('/electricityCharges', function(req, res, next) {
 		ElectricityCharge.createExtended(req.body, function(err) {
 			if (err) {
-				return next(err);
+				return next(res.__(err));
 			}
 			req.flash('alert-success', res.__('Data has been created successfully!'));
 			res.redirect('/electricityCharges');

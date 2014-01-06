@@ -39,6 +39,13 @@ module.exports.daysInYear = function(date) {
 	return module.exports.isLeapYear(date) ? 366 : 365;
 };
 
+module.exports.greaterEqual = function(first, second) {
+	first = toDate(first);
+	second = toDate(second);
+
+	return first >= second;
+};
+
 module.exports.greaterThan = function(first, second) {
 	first = toDate(first);
 	second = toDate(second);
@@ -46,12 +53,17 @@ module.exports.greaterThan = function(first, second) {
 	return first > second;
 };
 
+module.exports.dayBefore = function(date)  {
+	var day = toDate(date);
+	return day.setDate(day.getDate() - 1);
+};
+
 module.exports.locals = function(app) {
 	app.locals.today = function() {
 		var now = new Date();
 		var today = now.getFullYear() + '-' + zfill(now.getMonth() + 1) + '-' + zfill(now.getDate());
 		return today;		
-	}
+	};
 
 	app.locals.dateString = function(date) {
 		if (date) {
@@ -59,5 +71,5 @@ module.exports.locals = function(app) {
 		} else {
 			return null;
 		}
-	}	
+	};
 };

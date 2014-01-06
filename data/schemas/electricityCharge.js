@@ -1,5 +1,6 @@
 var async = require('async');
 var Schema = require('mongoose').Schema;
+var datetime = require('../../helpers/datetime');
 
 var ElectricityChargeSchema = new Schema({
 	C: {
@@ -35,6 +36,10 @@ var ElectricityChargeSchema = new Schema({
 	appliesFrom: {
 		type: Date,
 		default: null
+	},
+	appliesTo: {
+		type: Date,
+		default: null
 	}
 
 });
@@ -43,51 +48,128 @@ ElectricityChargeSchema.statics.getLabels = function(callback) {
 	callback(null, ['C', 'SSvn', 'SZVnk', 'Sop','SoSJ', 'Os']);
 };
 
-ElectricityChargeSchema.statics.findExtended = function(callback) {
+ElectricityChargeSchema.statics.createDefault = function(callback) {
 	var model = this;
-	model.find({ })
-		.sort('appliesFrom')
-		.exec(function(err, electricityCharges) {
-			if (err) {
-				return callback(err);
-			}
-			if (electricityCharges.length === 0) {
-				model.create({ }, function(err, electricityCharge) {
-					if (err) {
-						return callback(err);
-					}
-					// return as array to preserve the convention
-					return callback(null, [electricityCharge]);
-				});
-			} else {
-				return callback(null, electricityCharges);
-			}			
-		});
-};
 
-ElectricityChargeSchema.statics.findApplied = function(callback) {
-
-};
-
-ElectricityChargeSchema.statics.updateReadings = function(err, docs) {
-	var ElectricityReading = require('../models/electricityReading');
-	async.forEachSeries(docs, ElectricityReading.updateExtendedWrapper.bind(ElectricityReading), function(err) {
-		if (err) {
-			return err;
-		}
-		return null;
-	});				
-};
-
-ElectricityChargeSchema.statics.createExtended = function(electricityCharge, callback) {
-	var model = this;
-	var ElectricityReading = require('../models/electricityReading');
-
-	model.create(electricityCharge, function(err, electricityCharge) {
+	model.create({ }, function(err, electricityCharge) {
 		if (err) {
 			return callback(err);
 		}
-		ElectricityReading.find({ date : { $gte: electricityCharge.appliesFrom }}, model.updateReadings);		
+		return callback(null, electricityCharge);
+	});	
+};
+
+ElectricityChargeSchema.statics.findExtended = function(callback) {
+	var model = this;
+
+	model.count({ }, function(err, cnt) {
+		if (cnt === 0) {
+			model.createDefault(function(err, electricityCharge) {
+				if (err) {
+					return callback(err);
+				} else {
+					return callback(null, [electricityCharge]);
+				}
+			});			
+		} else {
+			model
+			.find({ })
+			.sort('-appliesFrom')
+			.exec(function(err, electricityCharges) {
+				if (err) {
+					return callback(err);
+				} else {
+					return callback(null, electricityCharges);
+				}			
+			});			
+		}
+	});
+};
+
+ElectricityChargeSchema.statics.findNewest = function(callback) {
+	this
+	.find({ })
+	.limit(1)
+	.sort('-appliesFrom')
+	.exec(callback);
+};
+
+ElectricityChargeSchema.statics.findForDate = function(readingDate, callback) {
+	this
+	.find({
+		$or: [
+				{ appliesFrom : { $lte: readingDate  } },
+				{ appliesFrom : null }
+		]
+	})
+	.limit(1)
+	.sort('-appliesFrom')
+	.exec(callback);	
+};
+
+ElectricityChargeSchema.statics.findApplied = function(readingDate, callback) {
+
+	var model = this;
+
+	model.count({ }, function(err, cnt) {
+		if (cnt === 0) {
+			model.createDefault(function(err, electricityCharge) {
+				if (err) {
+					return callback(err);
+				} else {
+					return model.findForDate(readingDate, callback);
+				}
+			});
+		} else {
+			return model.findForDate(readingDate, callback);
+		}
+	});
+};
+
+ElectricityChargeSchema.statics.createExtended = function(electricityCharge, callback) {
+	function updateReadings(err, docs) {
+		var ElectricityReading = require('../models/electricityReading');
+		async.forEachSeries(docs, ElectricityReading.updateExtendedWrapper.bind(ElectricityReading), function(err) {
+			if (err) {
+				return callback(err);
+			}
+			return callback(null);
+		});				
+	}
+
+	var model = this;
+	var ElectricityReading = require('../models/electricityReading');
+
+	model.findNewest(function(err, newestCharge) {
+		if (err) {
+			return callback(err);
+		} else {
+			var newest = newestCharge[0];
+			if (datetime.greaterEqual(newest.appliesFrom, electricityCharge.appliesFrom)) {
+				return callback('New date must be greater than the previous one');
+			} else {
+				model.findForDate(electricityCharge.appliesFrom, function(err, electricityCharges) {
+					if (err) {
+						return callback(err);
+					} else {
+						var previousCharge = electricityCharges[0];		
+						model.findByIdAndUpdate(previousCharge.id, { appliesTo: datetime.dayBefore(electricityCharge.appliesFrom) }, function(err) {
+							if (err) {
+								return callback(err);
+							} else {
+								model.create(electricityCharge, function(err, electricityCharge) {
+									if (err) {
+										return callback(err);
+									} else {
+										ElectricityReading.find({ date : { $gte: electricityCharge.appliesFrom }}, updateReadings);
+									}
+								});
+							}
+						});
+					}
+				});
+			}
+		}
 	});
 };
 
@@ -100,7 +182,7 @@ ElectricityChargeSchema.statics.updateExtended = function(charges, id, callback)
 			}
 			return callback(null);
 		});				
-	};
+	}
 
 	var model = this;	
 	var ElectricityReading = require('../models/electricityReading');
