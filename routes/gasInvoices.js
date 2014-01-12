@@ -9,6 +9,11 @@ var routesHelper = require('../helpers/routes_helper');
 
 module.exports = function(app) {
 
+	function getCosts(callback) {
+		var costs = {};
+		return callback(null, costs);
+	}
+
 	routesHelper.setRoutes(app, GasInvoice, middleware, '/gasInvoices',
 		{'index': 'Gas Invoices', 'new': 'New invoice', 'edit': 'Edit invoice'});
 
@@ -26,5 +31,17 @@ module.exports = function(app) {
 			});			
 		});
 	});
+
+	app.get('/heatingCosts/json', function(req, res, next) {
+		console.log('json request');
+		getCosts(function(err, costs) {
+			if (err) {
+				return next(err);
+			}
+			res.set('Access-Control-Allow-Origin', '*');
+			res.set('Access-Control-Allow-Headers', 'X-Requested-With');			
+			res.send(costs);
+		});
+	});	
 
 };

@@ -24,3 +24,22 @@ svg {
 #slider {
 	width: 1000px;
 }
+
+.bar {
+  fill: steelblue;
+}
+
+.bar:hover {
+  fill: brown;
+}
+
+.cost.axis {
+  font: 10px sans-serif;
+}
+
+.cost.axis path,
+.cost.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
