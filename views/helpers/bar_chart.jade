@@ -11,9 +11,9 @@ script.
 			return number ? parseFloat(Math.round(number * 100) / 100).toFixed(precision) : null;
 		};
 
-		var margin = {top: 40, right: 20, bottom: 30, left: 40},
-				width = 420 - margin.left - margin.right,
-				height = 250 - margin.top - margin.bottom;
+		var margin = {top: 40, right: 20, bottom: 30, left: 50},
+				width = 700 - margin.left - margin.right,
+				height = 450 - margin.top - margin.bottom;
 
 		var x0 = d3.scale.ordinal()
 				.rangeRoundBands([0, width], .1);
@@ -23,7 +23,7 @@ script.
 				.range([height, 0]);
 
 		var color = d3.scale.ordinal()
-				.range(["#98abc5", "#8a89a6"]);
+				.range(["#34495e", "#2980b9"]);
 
 		var xAxis = d3.svg.axis()
 				.scale(x0)
@@ -37,7 +37,7 @@ script.
 			.attr('class', 'd3-tip')
 			.offset([-10, 0])
 			.html(function(d) {
-				return "<strong>" + d.name + "</strong> <span style='color:red'>" + round(d.value) + "</span>";
+				return "<strong>" + d.name + " : </strong> <span style='color:#e74c3c'>" + round(d.value) + "</span>";
 			});
 
 		var svg = d3.select('#barChart').append('svg')
@@ -73,7 +73,7 @@ script.
 					.attr('y', 6)
 					.attr('dy', '.71em')
 					.style('text-anchor', 'end')
-					.text('Faktury');
+					.text('Koszty ogrzewania');
 
 			var year = svg.selectAll('.year')
 					.data(data)

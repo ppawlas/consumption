@@ -14,7 +14,12 @@ block content
 	script.
 		$(document).ready(function() {
 
-			round = function(number, precision) {
+			var getDate = function(date) {
+				var month = date.getMonth() + 1;
+				return date.getFullYear() + '-' + (month < 10 ? '0' + month : month) ;
+			};
+
+			var round = function(number, precision) {
 				precision = typeof precision !== 'undefined' ? precision : 2;
 
 				return number ? parseFloat(Math.round(number * 100) / 100).toFixed(precision) : null;
@@ -26,7 +31,7 @@ block content
 				}
 				var data = [];
 
-				json.periods.forEach(function(period) {
+				json.periods.reverse().forEach(function(period) {
 					obj = {}
 					obj.date = parseDate(period);
 					obj.gas = nullify(json.data[period].gas);
@@ -50,12 +55,13 @@ block content
 			var y = d3.scale.linear()
 					.range([height - 10 , 10]);
 
-			var color = d3.scale.category10();					
+			var color = d3.scale.ordinal()
+				.range(["#34495e", "#f39c12", "#2980b9"]);
 
 			var xAxis = d3.svg.axis()
 					.scale(x)
 					.orient('bottom')
-					.ticks(10);
+					.ticks(8);
 
 			var yAxis = d3.svg.axis()
 					.scale(y)
@@ -67,7 +73,7 @@ block content
 				.offset([-10, 0])
 				.html(function(d) {
 					console.log(d);
-					return "<strong>Zużycie:</strong> <span style='color:red'>" + round(d.usage) + "</span>";
+					return "<strong>" + getDate(d.date) + " : </strong> <span style='color:#e74c3c'>" + round(d.usage) + "</span>";
 				});
 
 			var line = d3.svg.line()
@@ -92,7 +98,7 @@ block content
 					.attr('height', height);
 
 			// from and to are timestamps .getTime()
-			d3.json('/statistics/json', function(err, json) {				
+			d3.json('/statistics/json', function(err, json) {
 				if (err) {
 					console.warn(err);
 				}

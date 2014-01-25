@@ -7,6 +7,10 @@
 
 }
 
+.axis {
+  font-size: 14px;
+}
+
 .x.axis path {
   display: none;
 }
@@ -23,14 +27,6 @@ svg {
 
 #slider {
 	width: 1000px;
-}
-
-.bar {
-  fill: orange;
-}
-
-.bar:hover {
-  fill: orangered ;
 }
 
 .cost.axis {
