@@ -10,8 +10,25 @@ var routesHelper = require('../helpers/routes_helper');
 module.exports = function(app) {
 
 	function getCosts(callback) {
-		var costs = {};
-		return callback(null, costs);
+		GasInvoice.findCosts(function(err, costsData) {
+			if (err) {
+				return callback(err);
+			}
+			var data = [];
+			costsData.forEach(function(costDatum) {
+				var datum = {
+					'_id': costDatum._id,
+					'Koszt': costDatum.cost,
+					'Zużycie': costDatum.usage
+				};
+				datum.invoices = [
+					{'name': 'Koszt', 'value': costDatum.cost},
+					{'name': 'Zużycie', 'value': costDatum.usage}
+				];
+				data.push(datum);
+			});
+			return callback(null, data);
+		});
 	}
 
 	routesHelper.setRoutes(app, GasInvoice, middleware, '/gasInvoices',
@@ -33,7 +50,6 @@ module.exports = function(app) {
 	});
 
 	app.get('/heatingCosts/json', function(req, res, next) {
-		console.log('json request');
 		getCosts(function(err, costs) {
 			if (err) {
 				return next(err);

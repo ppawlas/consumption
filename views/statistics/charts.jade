@@ -6,12 +6,19 @@ block content
 
 	script(src='/javascripts/jquery-ui-1.10.3.custom.min.js')
 	script(src='/javascripts/d3.min.js')
+	script(src='/javascripts/d3.tip.v0.6.3.js')
 
 	div(id='chart')
 	div(id='slider')
 
 	script.
 		$(document).ready(function() {
+
+			round = function(number, precision) {
+				precision = typeof precision !== 'undefined' ? precision : 2;
+
+				return number ? parseFloat(Math.round(number * 100) / 100).toFixed(precision) : null;
+			};			
 
 			function prepare(json) {
 				function nullify(usage) {
@@ -53,7 +60,15 @@ block content
 			var yAxis = d3.svg.axis()
 					.scale(y)
 					.orient('left')
-					.ticks(10);		
+					.ticks(10);
+
+			var tip = d3.tip()
+				.attr('class', 'd3-tip')
+				.offset([-10, 0])
+				.html(function(d) {
+					console.log(d);
+					return "<strong>Zużycie:</strong> <span style='color:red'>" + round(d.usage) + "</span>";
+				});
 
 			var line = d3.svg.line()
 				.x(function(d) { return x(d.date); })
@@ -63,7 +78,9 @@ block content
 					.attr('width', width + margin.left + margin.right)
 					.attr('height', height + margin.top + margin.bottom)
 				.append('g')
-					.attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');						
+					.attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+
+			svg.call(tip);				
 
 			var clip = svg.append('defs').append('svg:clipPath')
 					.attr('id', 'clip')
@@ -87,6 +104,7 @@ block content
 					max: data.length - 1,
 					values: [0, data.length - 1],
 					slide: function(event, ui) {
+						console.log(ui);
 						var sliderMax = d3.min([data[ui.values[1]].date, data[data.length - 1].date]);
 						var sliderMin = d3.max([data[ui.values[0]].date, data[0].date]);
 
@@ -146,7 +164,7 @@ block content
 						.attr('y', 6)
 						.attr('dy', '.71em')
 						.style('text-anchor', 'end')
-						.text('Usage');
+						.text('Zużycie');
 
 				var reading = svg.selectAll('.reading')
 							.data(readings)
@@ -183,10 +201,11 @@ block content
 							.style('stroke-width', 2)
 							.style('fill', function(d) { return 'white'; })
 							.on('mouseover', function(d) {
+								tip.show(d);
 								d3.select(this).transition().attr('r', 6).duration(500);
-								console.log(d);
 							})
 							.on('mouseout', function(d) {
+								tip.hide(d);
 								d3.select(this).transition().attr('r', 3).duration(500);							
 							});
 
