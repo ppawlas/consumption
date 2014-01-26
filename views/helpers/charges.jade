@@ -33,7 +33,7 @@ block content
 						td
 							form(action=controllerPath + '/' + encodeURIComponent(electricityCharge._id), method='GET')
 								- if(electricityCharge['appliesTo'])
-									button(type='submit', class='btn btn-primary', disabled)= __('Edit')
+									button(type='submit', class='btn btn-default', disabled)= __('Edit')
 								- else
-									button(type='submit', class='btn btn-primary')= __('Edit')
+									button(type='submit', class='btn btn-default')= __('Edit')
 				- });

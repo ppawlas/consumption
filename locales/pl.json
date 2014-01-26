@@ -28,7 +28,7 @@
 	"Edit invoice": "Edytuj fakturę",
 	"Year": "Rok",
 	"Cost": "Koszt",
-	"Ratio": "Stosunek",
+	"Ratio": "Średnia cena",
 	"Daily": "Zużycie dzienne",
 	"Monthly prediction": "Zużycie miesięczne - symulacja",
 	"Price": "Cena za m<sup>3</sup>",
@@ -55,5 +55,9 @@
 	"Applies from": "Obowiązuje od",
 	"Data has been updated successfully test!": "Data has been updated successfully test!",
 	"Applies to": "Obowiązuje do",
-	"New date must be greater than the previous one": "Nowa data musi być większa niż poprzednia"
+	"New date must be greater than the previous one": "Nowa data musi być większa niż poprzednia",
+	"Year usage prediction": "Prognoza zużycia rocznego",
+	"Recalculate": "Przelicz",
+	"Statistics period start": "Początek okresu do statystyk",
+	"No data in period to prepare prediction": "Brak danych w wybranym okresie. Nie można przygotować prognozy"
 }

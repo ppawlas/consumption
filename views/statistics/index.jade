@@ -18,7 +18,7 @@ block content
 						th= __('Water / Week')
 				- periods.forEach(function(period) {
 					tr
-						td= period
+						td= formatPeriod(period)
 						td= round(data[period].gas)
 						td= round(data[period].electricity)
 						td= round(data[period].water)

@@ -72,4 +72,11 @@ module.exports.locals = function(app) {
 			return null;
 		}
 	};
+
+	app.locals.formatPeriod = function(period) {
+		var parts = period.split('-');
+		var year = parts[0];
+		var month = parts[1] < 10 ? '0' + parts[1] : parts[1];
+		return year + '-' + month;
+	};
 };

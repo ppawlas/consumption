@@ -5,10 +5,34 @@
 var async = require('async');
 var ElectricityReading = require('../data/models/electricityReading');
 var ElectricityCharge = require('../data/models/electricityCharge');
+var Prediction = require('../data/models/prediction');
 var middleware = require('../middleware/electricity');
 var routesHelper = require('../helpers/routes_helper');
 
 module.exports = function(app) {
+
+	app.get('/electricityReadings/prediction', function(req, res, next) {
+		Prediction.findExtended(function(err, prediction) {
+			if (err) {
+				return next(err);
+			}
+			res.render('helpers/prediction', {
+				title: res.__('Year usage prediction'),
+				prediction: prediction
+			});
+		});
+	});
+
+	app.put('/electricityReadings/prediction/:id', function(req, res, next) {
+		Prediction.findByIdAndUpdate(req.params.id, req.body,
+			function(err) {
+				if (err) {
+					return next(err);
+				}
+				res.redirect('/electricityReadings/prediction');
+			}
+		);
+	});
 
 	routesHelper.setRoutes(app, ElectricityReading, middleware, '/electricityReadings', {'index': 'Electricity Consumption'});
 
