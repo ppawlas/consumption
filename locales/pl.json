@@ -59,5 +59,15 @@
 	"Year usage prediction": "Prognoza zużycia rocznego",
 	"Recalculate": "Przelicz",
 	"Statistics period start": "Początek okresu do statystyk",
-	"No data in period to prepare prediction": "Brak danych w wybranym okresie. Nie można przygotować prognozy"
+	"No data in period to prepare prediction": "Brak danych w wybranym okresie. Nie można przygotować prognozy.",
+	"Administration": "Administracja",
+	"Dump database": "Utwórz kopię zapasową bazy danych",
+	"Dump": "Utwórz kopię zapasową",
+	"Restore database": "Przywróć bazę danych",
+	"Restore": "Przywróć",
+	"Backup directory": "Katalog kopii zapasowej",
+	"Database has been stored successfully!": "Kopia zapasowa bazy danych została utworzona poprawnie!",
+	"Database has been restored successfully!": "Baza danych została przywrócona poprawnie!",
+	"Database has not been restored!": "Baza danych nie została przywrócona poprawnie!",
+	"Database has not been stored!": "Kopia zapasowa bazy danych nie została utworzona poprawnie!!"
 }

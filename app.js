@@ -51,6 +51,7 @@ require('./routes/gasInvoices')(app);
 require('./routes/electricityReadings')(app);
 require('./routes/waterReadings')(app);
 require('./routes/statistics')(app);
+require('./routes/admin')(app);
 
 http.createServer(app).listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
